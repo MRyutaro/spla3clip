@@ -1,5 +1,5 @@
 import { Box, Button, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // 時刻とその時刻における解析結果
 interface TimeLine {
@@ -43,15 +43,14 @@ const initialTimeLines: TimeLine[] = [
     { time: "00:05:00", result: "finish" },
 ];
 
-
 function App(): JSX.Element {
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
     const [timeLines, setTimeLines] = useState<TimeLine[]>([]);
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
         const resize = () => {
-            // console.log(window.innerHeight, window.innerWidth);
             setHeight(window.innerHeight);
             setWidth(window.innerWidth);
         };
@@ -66,17 +65,26 @@ function App(): JSX.Element {
 
     useEffect(() => {
         setTimeLines(initialTimeLines);
-    }, [setTimeLines]);
+    }, []);
+
+    const handleTimeClick = (time: string) => {
+        if (videoRef.current) {
+            const [hours, minutes, seconds] = time.split(":").map(Number);
+            const secondsToJump = hours * 3600 + minutes * 60 + seconds;
+            videoRef.current.currentTime = secondsToJump;
+            videoRef.current.play();
+        }
+    };
 
     return (
         <Box
             width={width}
             height={height}
-            // 要素を縦に並べる
             display="flex"
             flexDirection="row"
         >
             <video
+                ref={videoRef}
                 src="/background.mp4"
                 controls
                 style={{
@@ -86,9 +94,7 @@ function App(): JSX.Element {
             <Box
                 sx={{
                     padding: "4px",
-                    // widthは残りのスペースを全て使う
                     flex: 1,
-                    // 要素を縦に並べる
                     display: "flex",
                     flexDirection: "column",
                 }}
@@ -131,9 +137,7 @@ function App(): JSX.Element {
                 </Typography>
                 <Box
                     sx={{
-                        // スクロール可能にする
                         overflow: "auto",
-                        // 高さを指定
                         height: "100%",
                     }}
                 >
@@ -144,7 +148,12 @@ function App(): JSX.Element {
                                 marginBottom: "4px",
                             }}
                         >
-                            <b>{timeLine.time}</b> {timeLine.result}
+                            <b
+                                style={{ cursor: "pointer", color: "blue" }}
+                                onClick={() => handleTimeClick(timeLine.time)}
+                            >
+                                {timeLine.time}
+                            </b> {timeLine.result}
                         </Typography>
                     ))}
                 </Box>

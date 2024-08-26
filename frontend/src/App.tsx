@@ -1,5 +1,5 @@
-import { Box, Button, Typography } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { Box, Button, Container, Typography } from "@mui/material";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 // 時刻とその時刻における解析結果
 interface TimeLine {
@@ -44,69 +44,47 @@ const initialTimeLines: TimeLine[] = [
 ];
 
 function App(): JSX.Element {
-    const [width, setWidth] = useState(0);
-    const [height, setHeight] = useState(0);
     const [timeLines, setTimeLines] = useState<TimeLine[]>([]);
     const videoRef = useRef<HTMLVideoElement>(null);
-
-    useEffect(() => {
-        const resize = () => {
-            setHeight(window.innerHeight);
-            setWidth(window.innerWidth);
-        };
-
-        window.addEventListener("resize", resize);
-        resize();
-
-        return () => {
-            window.removeEventListener("resize", resize);
-        };
-    }, []);
 
     useEffect(() => {
         setTimeLines(initialTimeLines);
     }, []);
 
-    const handleTimeClick = (time: string) => {
+    const handleTimeClick = useCallback((time: string) => {
         if (videoRef.current) {
             const [hours, minutes, seconds] = time.split(":").map(Number);
             const secondsToJump = hours * 3600 + minutes * 60 + seconds;
             videoRef.current.currentTime = secondsToJump;
             videoRef.current.play();
         }
-    };
+    }, [videoRef]);
 
     return (
-        <Box
-            width={width}
-            height={height}
-            display="flex"
-            flexDirection="row"
-        >
+        <Container>
             <video
                 ref={videoRef}
                 src="/background.mp4"
                 controls
                 style={{
-                    height: "90%",
+                    width: "100%",
                 }}
             />
-            <Box
+            <Typography
+                variant="h5"
                 sx={{
-                    padding: "4px",
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
+                    marginBottom: "4px",
                 }}
             >
-                <Typography
-                    variant="h5"
-                    sx={{
-                        marginBottom: "4px",
-                    }}
-                >
-                    メニュー
-                </Typography>
+                メニュー
+            </Typography>
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    marginBottom: "4px",
+                }}
+            >
                 <Button
                     variant="contained"
                     color="primary"
@@ -127,38 +105,33 @@ function App(): JSX.Element {
                 >
                     解析結果を取得する
                 </Button>
-                <Typography
-                    variant="h5"
-                    sx={{
-                        marginBottom: "4px",
-                    }}
-                >
-                    解析結果
-                </Typography>
-                <Box
-                    sx={{
-                        overflow: "auto",
-                        height: "100%",
-                    }}
-                >
-                    {timeLines.map((timeLine, index) => (
-                        <Typography
-                            key={index}
-                            sx={{
-                                marginBottom: "4px",
-                            }}
-                        >
-                            <b
-                                style={{ cursor: "pointer", color: "blue" }}
-                                onClick={() => handleTimeClick(timeLine.time)}
-                            >
-                                {timeLine.time}
-                            </b> {timeLine.result}
-                        </Typography>
-                    ))}
-                </Box>
             </Box>
-        </Box>
+            <Typography
+                variant="h5"
+                sx={{
+                    marginBottom: "4px",
+                }}
+            >
+                解析結果
+            </Typography>
+            <Box>
+                {timeLines.map((timeLine, index) => (
+                    <Typography
+                        key={index}
+                        sx={{
+                            marginBottom: "4px",
+                        }}
+                    >
+                        <b
+                            style={{ cursor: "pointer", color: "blue" }}
+                            onClick={() => handleTimeClick(timeLine.time)}
+                        >
+                            {timeLine.time}
+                        </b> {timeLine.result}
+                    </Typography>
+                ))}
+            </Box>
+        </Container>
     );
 }
 

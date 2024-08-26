@@ -1,26 +1,156 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Box, Button, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+// 時刻とその時刻における解析結果
+interface TimeLine {
+    // timeはhh:mm:ss形式の文字列
+    time: string;
+    result: "kill" | "death" | "start" | "finish";
+}
+
+// 解析結果のリスト
+const initialTimeLines: TimeLine[] = [
+    { time: "00:00:00", result: "start" },
+    { time: "00:00:10", result: "death" },
+    { time: "00:00:20", result: "kill" },
+    { time: "00:00:30", result: "kill" },
+    { time: "00:00:40", result: "kill" },
+    { time: "00:00:50", result: "death" },
+    { time: "00:01:00", result: "kill" },
+    { time: "00:01:10", result: "kill" },
+    { time: "00:01:20", result: "death" },
+    { time: "00:01:30", result: "kill" },
+    { time: "00:01:40", result: "kill" },
+    { time: "00:01:50", result: "death" },
+    { time: "00:02:00", result: "kill" },
+    { time: "00:02:10", result: "death" },
+    { time: "00:02:20", result: "kill" },
+    { time: "00:02:30", result: "death" },
+    { time: "00:02:40", result: "kill" },
+    { time: "00:02:50", result: "death" },
+    { time: "00:03:00", result: "kill" },
+    { time: "00:03:10", result: "kill" },
+    { time: "00:03:20", result: "death" },
+    { time: "00:03:30", result: "kill" },
+    { time: "00:03:40", result: "death" },
+    { time: "00:03:50", result: "kill" },
+    { time: "00:04:00", result: "death" },
+    { time: "00:04:10", result: "kill" },
+    { time: "00:04:20", result: "kill" },
+    { time: "00:04:30", result: "death" },
+    { time: "00:04:40", result: "kill" },
+    { time: "00:04:50", result: "kill" },
+    { time: "00:05:00", result: "finish" },
+];
+
+
+function App(): JSX.Element {
+    const [width, setWidth] = useState(0);
+    const [height, setHeight] = useState(0);
+    const [timeLines, setTimeLines] = useState<TimeLine[]>([]);
+
+    useEffect(() => {
+        const resize = () => {
+            // console.log(window.innerHeight, window.innerWidth);
+            setHeight(window.innerHeight);
+            setWidth(window.innerWidth);
+        };
+
+        window.addEventListener("resize", resize);
+        resize();
+
+        return () => {
+            window.removeEventListener("resize", resize);
+        };
+    }, []);
+
+    useEffect(() => {
+        setTimeLines(initialTimeLines);
+    }, [setTimeLines]);
+
+    return (
+        <Box
+            width={width}
+            height={height}
+            // 要素を縦に並べる
+            display="flex"
+            flexDirection="row"
         >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+            <video
+                src="/background.mp4"
+                controls
+                style={{
+                    height: "90%",
+                }}
+            />
+            <Box
+                sx={{
+                    padding: "4px",
+                    // widthは残りのスペースを全て使う
+                    flex: 1,
+                    // 要素を縦に並べる
+                    display: "flex",
+                    flexDirection: "column",
+                }}
+            >
+                <Typography
+                    variant="h5"
+                    sx={{
+                        marginBottom: "4px",
+                    }}
+                >
+                    メニュー
+                </Typography>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{
+                        marginBottom: "4px",
+                    }}
+                    onClick={() => { alert("動画を送信しました。") }}
+                >
+                    動画を送信する
+                </Button>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{
+                        marginBottom: "4px",
+                    }}
+                    onClick={() => { alert("解析結果を取得しました。") }}
+                >
+                    解析結果を取得する
+                </Button>
+                <Typography
+                    variant="h5"
+                    sx={{
+                        marginBottom: "4px",
+                    }}
+                >
+                    解析結果
+                </Typography>
+                <Box
+                    sx={{
+                        // スクロール可能にする
+                        overflow: "auto",
+                        // 高さを指定
+                        height: "100%",
+                    }}
+                >
+                    {timeLines.map((timeLine, index) => (
+                        <Typography
+                            key={index}
+                            sx={{
+                                marginBottom: "4px",
+                            }}
+                        >
+                            <b>{timeLine.time}</b> {timeLine.result}
+                        </Typography>
+                    ))}
+                </Box>
+            </Box>
+        </Box>
+    );
 }
 
 export default App;

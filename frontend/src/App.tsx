@@ -130,6 +130,15 @@ export default function App(): JSX.Element {
 
     return (
         <Container>
+            {/* このツールは広告を含んでいます */}
+            <Typography
+                sx={{
+                    textAlign: "center",
+                    marginBottom: "16px",
+                }}
+            >
+                このツールは広告を含んでいます。
+            </Typography>
             <Typography
                 variant="h5"
                 sx={{

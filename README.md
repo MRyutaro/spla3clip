@@ -1,0 +1,2 @@
+# splatoon3_highlight_collector
+スプラトゥーン3でキル・デスした時刻を自動で集めるツール

@@ -5,6 +5,8 @@ import webbrowser
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
@@ -22,9 +24,14 @@ app.add_middleware(
 )
 
 
+# Reactでビルドしたファイルを配信するための設定
+app.mount("/static", StaticFiles(directory="frontend/build/static"), name="static")
+
+
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    # /frontend/build/index.htmlを返す
+    return FileResponse("frontend/build/index.html")
 
 
 def open_browser():

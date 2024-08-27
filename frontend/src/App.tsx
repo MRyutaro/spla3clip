@@ -171,7 +171,12 @@ export default function App(): JSX.Element {
     }, [convertToCSV, generateRandomString, timeLines]);
 
     return (
-        <Container>
+        <Container
+            sx={{
+                WebkitOverflowScrolling: "touch",
+                scrollbarWidth: "none",
+            }}
+        >
             <Typography
                 variant="h5"
                 sx={{

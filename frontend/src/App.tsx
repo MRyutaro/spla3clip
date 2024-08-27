@@ -1,5 +1,9 @@
 import { Box, Button, Container, Typography } from "@mui/material";
 import { useEffect, useRef, useState, useCallback } from "react";
+import axios from "axios";
+
+const backendUrl = "http://localhost:8000";
+
 
 // 時刻とその時刻における解析結果
 interface TimeLine {
@@ -45,14 +49,50 @@ const initialTimeLines: TimeLine[] = [
 
 export default function App(): JSX.Element {
     const [timeLines, setTimeLines] = useState<TimeLine[]>([]);
-    const [videoPath, setVideoPath] = useState<string>("");
     const videoRef = useRef<HTMLVideoElement>(null);
     const timelineRefs = useRef<(HTMLDivElement | HTMLSpanElement | null)[]>([]);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [videoPath, setVideoPath] = useState<string | null>(null);
 
     useEffect(() => {
         setTimeLines(initialTimeLines);
     }, []);
 
+    // 動画ファイルが選択されたときに呼ばれる処理
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            setSelectedFile(event.target.files[0]);
+        }
+    };
+
+    // 動画をサーバーに送信する処理
+    const handleFileUpload = async () => {
+        if (!selectedFile) {
+            alert("ファイルを選択してください。");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+
+        try {
+            // ファイルを送信。成功すればバックエンドから動画のパスが返ってくる。
+            alert("ファイルを送信しています。");
+        } catch (error) {
+            alert("ファイルの送信に失敗しました。");
+        }
+    };
+
+    // 解析結果を取得する処理
+    const fetchResult = async () => {
+        try {
+            alert("解析結果を取得しています。");
+        } catch (error) {
+            alert("解析結果の取得に失敗しました。");
+        }
+    };
+
+    // 時刻をクリックしたときに呼ばれる処理
     const handleTimeClick = useCallback(
         (time: string) => {
             if (videoRef.current) {
@@ -65,6 +105,7 @@ export default function App(): JSX.Element {
         [videoRef]
     );
 
+    // 動画の再生位置を監視して、解析結果の時刻に合わせてスクロールする処理
     useEffect(() => {
         const videoElement = videoRef.current;
 
@@ -129,19 +170,6 @@ export default function App(): JSX.Element {
         URL.revokeObjectURL(url);
     }, [convertToCSV, generateRandomString, timeLines]);
 
-    // 指定した動画のパスに動画が存在しているかどうかを確認する
-    const handleCheckVideo = useCallback(async () => {
-        try {
-            const response = await fetch(videoPath);
-            if (!response.ok) {
-                throw new Error("動画が見つかりませんでした。");
-            }
-        } catch (error) {
-            alert(error);
-        }
-    }
-    , [videoPath]);
-
     return (
         <Container>
             <Typography
@@ -159,39 +187,46 @@ export default function App(): JSX.Element {
                     marginBottom: "16px",
                 }}
             >
-                <Button
-                    variant="contained"
-                    color="primary"
+                <Box
                     sx={{
-                        marginBottom: "4px",
-                    }}
-                    onClick={() => {
-                        alert("動画を送信しました。");
+                        marginBottom: "8px",
+                        // 左右にアイテムを配置
+                        display: "flex",
+                        justifyContent: "space-between",
+                        // 真ん中にアイテムを配置
+                        alignItems: "center",
                     }}
                 >
-                    動画を送信する
-                </Button>
+                    <input type="file" accept="video/*" onChange={handleFileChange} />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleFileUpload}
+                    >
+                        動画を送信する
+                    </Button>
+                </Box>
                 <Button
                     variant="contained"
                     color="primary"
                     sx={{
-                        marginBottom: "4px",
+                        marginBottom: "8px",
                     }}
-                    onClick={() => {
-                        alert("解析結果を取得しました。");
-                    }}
+                    onClick={fetchResult}
                 >
                     解析結果を取得する
                 </Button>
             </Box>
+            <hr />
             <Typography
                 variant="h5"
                 sx={{
-                    marginBottom: "4px",
+                    marginBottom: "8px",
                 }}
             >
                 解析結果
             </Typography>
+            {/* videoPathがnullでない場合、動画を表示 */}
             {videoPath && (
                 <video
                     src={videoPath}
@@ -199,6 +234,7 @@ export default function App(): JSX.Element {
                     controls
                     style={{
                         width: "100%",
+                        marginBottom: "8px",
                     }}
                 />
             )}
@@ -236,7 +272,6 @@ export default function App(): JSX.Element {
                 sx={{
                     display: "flex",
                     flexDirection: "column",
-                    marginBottom: "4px",
                 }}
             >
                 <Button

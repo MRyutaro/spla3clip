@@ -165,3 +165,4 @@ node_modules
 
 # フォルダー
 model_build/data/raw
+model_analysis/data/

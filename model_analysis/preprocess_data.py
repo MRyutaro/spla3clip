@@ -10,14 +10,11 @@ import cv2
 import numpy as np
 
 
-def process_image(image_path: str) -> np.ndarray:
-    # 画像を開く
-    image = cv2.imread(image_path)
-
+def process_image(image: np.ndarray) -> np.ndarray:
     # サイズの確認
     aspect_ratio = image.shape[1] / image.shape[0]
     if abs(aspect_ratio - 16 / 9) > 0.01:
-        print(f"アスペクト比が16:9ではない為、スキップしました。: {image_path}")
+        print(f"アスペクト比が16:9ではない画像: {image_path}")
         return None
 
     # グレースケール変換

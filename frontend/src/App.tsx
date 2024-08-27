@@ -45,6 +45,7 @@ const initialTimeLines: TimeLine[] = [
 
 export default function App(): JSX.Element {
     const [timeLines, setTimeLines] = useState<TimeLine[]>([]);
+    const [videoPath, setVideoPath] = useState<string>("");
     const videoRef = useRef<HTMLVideoElement>(null);
     const timelineRefs = useRef<(HTMLDivElement | HTMLSpanElement | null)[]>([]);
 
@@ -128,17 +129,21 @@ export default function App(): JSX.Element {
         URL.revokeObjectURL(url);
     }, [convertToCSV, generateRandomString, timeLines]);
 
+    // 指定した動画のパスに動画が存在しているかどうかを確認する
+    const handleCheckVideo = useCallback(async () => {
+        try {
+            const response = await fetch(videoPath);
+            if (!response.ok) {
+                throw new Error("動画が見つかりませんでした。");
+            }
+        } catch (error) {
+            alert(error);
+        }
+    }
+    , [videoPath]);
+
     return (
         <Container>
-            {/* このツールは広告を含んでいます */}
-            <Typography
-                sx={{
-                    textAlign: "center",
-                    marginBottom: "16px",
-                }}
-            >
-                このツールは広告を含んでいます。
-            </Typography>
             <Typography
                 variant="h5"
                 sx={{
@@ -187,14 +192,16 @@ export default function App(): JSX.Element {
             >
                 解析結果
             </Typography>
-            <video
-                ref={videoRef}
-                src="/background.mp4"
-                controls
-                style={{
-                    width: "100%",
-                }}
-            />
+            {videoPath && (
+                <video
+                    src={videoPath}
+                    ref={videoRef}
+                    controls
+                    style={{
+                        width: "100%",
+                    }}
+                />
+            )}
             <Box
                 sx={{
                     height: "200px",

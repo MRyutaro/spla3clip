@@ -1,4 +1,4 @@
-import { Box, Button, Container, Typography } from "@mui/material";
+import { Box, Button, Container, LinearProgress, Typography } from "@mui/material";
 import { useEffect, useRef, useState, useCallback } from "react";
 import axios from "axios";
 
@@ -12,51 +12,15 @@ interface TimeLine {
     result: "kill" | "death" | "start" | "finish";
 }
 
-// 解析結果のリスト
-const initialTimeLines: TimeLine[] = [
-    { time: "00:00:00", result: "start" },
-    { time: "00:00:10", result: "death" },
-    { time: "00:00:20", result: "kill" },
-    { time: "00:00:30", result: "kill" },
-    { time: "00:00:40", result: "kill" },
-    { time: "00:00:50", result: "death" },
-    { time: "00:01:00", result: "kill" },
-    { time: "00:01:10", result: "kill" },
-    { time: "00:01:20", result: "death" },
-    { time: "00:01:30", result: "kill" },
-    { time: "00:01:40", result: "kill" },
-    { time: "00:01:50", result: "death" },
-    { time: "00:02:00", result: "kill" },
-    { time: "00:02:10", result: "death" },
-    { time: "00:02:20", result: "kill" },
-    { time: "00:02:30", result: "death" },
-    { time: "00:02:40", result: "kill" },
-    { time: "00:02:50", result: "death" },
-    { time: "00:03:00", result: "kill" },
-    { time: "00:03:10", result: "kill" },
-    { time: "00:03:20", result: "death" },
-    { time: "00:03:30", result: "kill" },
-    { time: "00:03:40", result: "death" },
-    { time: "00:03:50", result: "kill" },
-    { time: "00:04:00", result: "death" },
-    { time: "00:04:10", result: "kill" },
-    { time: "00:04:20", result: "kill" },
-    { time: "00:04:30", result: "death" },
-    { time: "00:04:40", result: "kill" },
-    { time: "00:04:50", result: "kill" },
-    { time: "00:05:00", result: "finish" },
-];
 
 export default function App(): JSX.Element {
     const [timeLines, setTimeLines] = useState<TimeLine[]>([]);
     const videoRef = useRef<HTMLVideoElement>(null);
     const timelineRefs = useRef<(HTMLDivElement | HTMLSpanElement | null)[]>([]);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [videoPath, setVideoPath] = useState<string | null>(null);
-
-    useEffect(() => {
-        setTimeLines(initialTimeLines);
-    }, []);
+    const [videoFileName, setVideoFileName] = useState<string>("");
+    const [videoPath, setVideoPath] = useState<string>("");
+    const [isUploading, setIsUploading] = useState<boolean>(false);
 
     // 動画ファイルが選択されたときに呼ばれる処理
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,6 +40,8 @@ export default function App(): JSX.Element {
         formData.append("file", selectedFile);
 
         try {
+            setIsUploading(true); // アップロード開始
+
             // ファイルを送信。成功すればバックエンドからfile_nameが返ってくる
             const response = await axios.post(`${backendUrl}/upload`, formData, {
                 headers: {
@@ -83,20 +49,40 @@ export default function App(): JSX.Element {
                 },
             });
             const videoFileName = response.data.file_name;
+            setVideoFileName(videoFileName);
             setVideoPath(`${backendUrl}/uploads/${videoFileName}`);
         } catch (error) {
             alert("ファイルの送信に失敗しました。");
+        } finally {
+            setIsUploading(false); // アップロード完了
         }
     };
+
+    // 解析タスクを開始する処理
+    const postPredictTask = async () => {
+        if (!videoFileName) {
+            alert("動画ファイルが選択されていません。");
+            return;
+        }
+
+        try {
+            await axios.post(`${backendUrl}/predict/${videoFileName}`);
+        } catch (error) {
+            alert("解析タスクの開始に失敗しました。");
+        }
+    }
 
     // 解析結果を取得する処理
     const fetchResult = async () => {
         try {
-            alert("解析結果を取得しています。");
+            const response = await axios.get(`${backendUrl}/result`);
+            const timeLines: TimeLine[] = response.data.time_lines;
+            // もしundefinedが返ってきたら空の配列にする
+            setTimeLines(timeLines || []);
         } catch (error) {
             alert("解析結果の取得に失敗しました。");
         }
-    };
+    }
 
     // 時刻をクリックしたときに呼ばれる処理
     const handleTimeClick = useCallback(
@@ -105,7 +91,6 @@ export default function App(): JSX.Element {
                 const [hours, minutes, seconds] = time.split(":").map(Number);
                 const secondsToJump = hours * 3600 + minutes * 60 + seconds;
                 videoRef.current.currentTime = secondsToJump;
-                videoRef.current.play();
             }
         },
         [videoRef]
@@ -119,7 +104,7 @@ export default function App(): JSX.Element {
             if (videoElement) {
                 const currentTime = videoElement.currentTime;
 
-                const closestIndex = timeLines.findIndex((timeLine) => {
+                const closestIndex = timeLines && timeLines.findIndex((timeLine) => {
                     const [hours, minutes, seconds] = timeLine.time
                         .split(":")
                         .map(Number);
@@ -130,7 +115,7 @@ export default function App(): JSX.Element {
                 if (closestIndex !== -1 && timelineRefs.current[closestIndex]) {
                     timelineRefs.current[closestIndex]?.scrollIntoView({
                         behavior: "smooth",
-                        block: "center",
+                        block: "start",
                     });
                 }
             }
@@ -163,6 +148,11 @@ export default function App(): JSX.Element {
 
     // ダウンロード処理
     const handleDownload = useCallback(() => {
+        // timeLinesが空の場合はダウンロードしない
+        if (timeLines.length === 0) {
+            alert("解析結果がありません。");
+            return;
+        }
         const csvContent = convertToCSV(timeLines);
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
@@ -198,25 +188,36 @@ export default function App(): JSX.Element {
                     marginBottom: "16px",
                 }}
             >
-                <Box
+                <p>
+                    1. 動画ファイルを選択する &rarr;{" "}
+                    <input type="file" accept="video/*" onChange={handleFileChange} style={{ marginBottom: "8px" }} />
+                </p>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleFileUpload}
                     sx={{
                         marginBottom: "8px",
-                        // 左右にアイテムを配置
-                        display: "flex",
-                        justifyContent: "space-between",
-                        // 真ん中にアイテムを配置
-                        alignItems: "center",
                     }}
                 >
-                    <input type="file" accept="video/*" onChange={handleFileChange} />
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleFileUpload}
-                    >
-                        動画を送信する
-                    </Button>
-                </Box>
+                    2. 動画ファイルを送信する
+                </Button>
+                {/* アップロード中の場合はプログレスバーを表示 */}
+                {isUploading && (
+                    <Box sx={{ width: "100%", marginBottom: "16px" }}>
+                        <LinearProgress />
+                    </Box>
+                )}
+                <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{
+                        marginBottom: "8px",
+                    }}
+                    onClick={postPredictTask}
+                >
+                    3. 解析を開始する
+                </Button>
                 <Button
                     variant="contained"
                     color="primary"
@@ -225,7 +226,7 @@ export default function App(): JSX.Element {
                     }}
                     onClick={fetchResult}
                 >
-                    解析結果を取得する
+                    4. 解析結果を取得する
                 </Button>
             </Box>
             <hr />
@@ -260,24 +261,28 @@ export default function App(): JSX.Element {
                     marginBottom: "8px",
                 }}
             >
-                {timeLines.map((timeLine, index) => (
-                    <Typography
-                        key={index}
-                        component="div"
-                        ref={(el) => (timelineRefs.current[index] = el)}
-                        sx={{
-                            marginBottom: "4px",
-                        }}
-                    >
-                        <b
-                            style={{ cursor: "pointer", color: "blue" }}
-                            onClick={() => handleTimeClick(timeLine.time)}
+                {timeLines.length > 0 ? (
+                    timeLines.map((timeLine, index) => (
+                        <Typography
+                            key={index}
+                            component="div"
+                            ref={(el) => (timelineRefs.current[index] = el)}
+                            sx={{
+                                marginBottom: "4px",
+                            }}
                         >
-                            {timeLine.time}
-                        </b>{" "}
-                        {timeLine.result}
-                    </Typography>
-                ))}
+                            <b
+                                style={{ cursor: "pointer", color: "blue" }}
+                                onClick={() => handleTimeClick(timeLine.time)}
+                            >
+                                {timeLine.time}
+                            </b>{" "}
+                            {timeLine.result}
+                        </Typography>
+                    ))
+                ) : (
+                    <Typography>解析結果がありません。</Typography>
+                )}
             </Box>
             <Box
                 sx={{
@@ -293,7 +298,7 @@ export default function App(): JSX.Element {
                     }}
                     onClick={handleDownload}
                 >
-                    解析結果をCSVファイルでダウンロード
+                    5. 解析結果をCSVファイルでダウンロードする
                 </Button>
             </Box>
         </Container>

@@ -6,10 +6,12 @@ import time
 import webbrowser
 
 import uvicorn
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+
+from models_analysis.main import analyze_video
 
 app = FastAPI()
 
@@ -29,9 +31,11 @@ app.add_middleware(
 
 # Reactでビルドしたファイルを配信するための設定
 app.mount("/static", StaticFiles(directory="frontend/build/static"), name="static")
+app.mount("/uploads", StaticFiles(directory="frontend/build/uploads"), name="uploads")
 
 # TODO: /frontend/build/uploadsに変更
-UPLOAD_DIR = "uploads"
+UPLOAD_DIR = "frontend/build/uploads"
+TIME_LINES = []
 
 
 def randomname(n):
@@ -62,6 +66,37 @@ async def upload_video(file: UploadFile = File(...)):
         return {"status": "ok", "file_name": file_name}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+
+def predict_background(file_name: str):
+    """
+    ランダムフォレストによる推論をバックグラウンドで行う
+    """
+    global TIME_LINES
+    time_lines = analyze_video(f"{UPLOAD_DIR}/{file_name}", "models")
+    print(time_lines)
+    TIME_LINES = time_lines
+
+
+@app.post("/predict/{file_name}")
+def predict(file_name: str, background_tasks: BackgroundTasks):
+    """
+    ランダムフォレストによる推論を行うエンドポイント
+    """
+    if not os.path.exists(f"{UPLOAD_DIR}/{file_name}"):
+        return {"status": "error", "message": "file not found"}
+    background_tasks.add_task(predict_background, file_name)
+    return {"status": "ok"}
+
+
+@app.get("/result")
+def get_result():
+    """
+    解析結果を取得する
+    """
+    global TIME_LINES
+    print(TIME_LINES)
+    return {"status": "ok", "time_lines": TIME_LINES}
 
 
 def open_browser():

@@ -74,7 +74,7 @@ def predict_background(file_name: str):
     """
     global TIME_LINES
     time_lines = analyze_video(f"{UPLOAD_DIR}/{file_name}", "models")
-    # print(time_lines)
+    print("解析結果：", time_lines)
     TIME_LINES = time_lines
 
 
@@ -83,6 +83,7 @@ def predict(file_name: str, background_tasks: BackgroundTasks):
     """
     ランダムフォレストによる推論を行うエンドポイント
     """
+    # TODO: ストリーミングを使ってリアルタイムで解析状況を取得できるようにする
     if not os.path.exists(f"{UPLOAD_DIR}/{file_name}"):
         return {"status": "error", "message": "file not found"}
     background_tasks.add_task(predict_background, file_name)

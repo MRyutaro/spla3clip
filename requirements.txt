@@ -8,6 +8,7 @@ idna==3.8
 isort==5.13.2
 joblib==1.4.2
 numpy==2.1.0
+opencv-python==4.10.0.84
 pydantic==2.8.2
 pydantic_core==2.20.1
 scikit-learn==1.5.1

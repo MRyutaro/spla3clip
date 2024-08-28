@@ -44,7 +44,7 @@ python -m venv .venv
 
 4. 仮想環境を有効化する。
 ```bash
-source venv/bin/activate
+source .venv/bin/activate
 ```
 
 5. 依存パッケージをインストールする。

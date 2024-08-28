@@ -46,6 +46,7 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
         print(f"動画ファイル {video_path} が存在しません。パスを確認してください。")
         return
     cap = cv2.VideoCapture(video_path)
+    FPS = cap.get(cv2.CAP_PROP_FPS)
     if not cap.isOpened():
         print(f"動画ファイル {video_path} を開けませんでした。動画が正しい形式か確認してください。")
         return
@@ -55,7 +56,8 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
     is_killing = False
 
     # ラベルを繰り返し格納するためのキュー
-    label_queue = deque(maxlen=20)
+    MAX_LEN = 20
+    label_queue = deque(maxlen=MAX_LEN)
 
     # 動画をフレームごとに読み込む
     while True:
@@ -77,7 +79,7 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
             # is_killigがFalseの時はTrueにしてデータを保存、Trueの時は保存しない
             if not is_killing:
                 results.append({
-                    "time": calculate_time(cap.get(cv2.CAP_PROP_POS_MSEC)),
+                    "time": calculate_time(cap.get(cv2.CAP_PROP_POS_MSEC) - 1000 / FPS * MAX_LEN),
                     "result": "kill"
                 })
                 if debug:
@@ -89,20 +91,6 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
         # キューの中身が全て0の時にis_killingをFalseにする
         elif all([label == 0 for label in label_queue]):
             is_killing = False
-
-        # if pred[0] == 1:
-        #     # is_killigがFalseの時はTrueにしてデータを保存、Trueの時は保存しない
-        #     if not is_killing:
-        #         print("killしました")
-        #         results.append({
-        #             "time": calculate_time(cap.get(cv2.CAP_PROP_POS_MSEC)),
-        #             "result": "kill"
-        #         })
-        #         pprint(results)
-        #         is_killing = True
-        # # キルしていないときis_killingをFalseにする
-        # else:
-        #     is_killing = False
 
         # 確認のために画像を表示
         if debug:

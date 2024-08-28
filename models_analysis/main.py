@@ -76,13 +76,14 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
         if all([label == 1 for label in label_queue]):
             # is_killigがFalseの時はTrueにしてデータを保存、Trueの時は保存しない
             if not is_killing:
-                print(label_queue)
-                print("killしました")
                 results.append({
                     "time": calculate_time(cap.get(cv2.CAP_PROP_POS_MSEC)),
                     "result": "kill"
                 })
-                pprint(results)
+                if debug:
+                    print(label_queue)
+                    print("killしました")
+                    pprint(results)
                 is_killing = True
 
         # キューの中身が全て0の時にis_killingをFalseにする

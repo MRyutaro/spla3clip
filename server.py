@@ -1,6 +1,8 @@
 import threading
 import time
 import webbrowser
+import random
+import string
 
 import uvicorn
 from fastapi import FastAPI
@@ -27,11 +29,33 @@ app.add_middleware(
 # Reactでビルドしたファイルを配信するための設定
 app.mount("/static", StaticFiles(directory="frontend/build/static"), name="static")
 
+# TODO: /frontend/build/uploadsに変更
+UPLOAD_DIR = "uploads"
+
+
+def randomname(n):
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=n))
+
 
 @app.get("/")
 def read_root():
     # /frontend/build/index.htmlを返す
     return FileResponse("frontend/build/index.html")
+
+
+@app.post("/upload")
+async def upload_video(file: bytes):
+    """
+    クライアントから受け取った動画ファイルを保存する
+    """
+    # ファイル名は32桁のランダムな数字
+    file_name = f"{randomname(32)}.mp4"
+    try:
+        with open(f"{UPLOAD_DIR}/{file_name}", "wb") as f:
+            f.write(file)
+        return {"status": "ok"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 def open_browser():

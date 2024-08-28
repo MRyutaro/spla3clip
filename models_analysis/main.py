@@ -6,7 +6,7 @@ import pickle
 import sys
 from pprint import pprint
 
-# from collections import deque
+from collections import deque
 
 import cv2
 
@@ -54,6 +54,9 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
 
     is_killing = False
 
+    # ラベルを繰り返し格納するためのキュー
+    label_queue = deque(maxlen=20)
+
     # 動画をフレームごとに読み込む
     while True:
         ret, frame = cap.read()
@@ -66,9 +69,14 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
         # モデルに入力
         pred = kill_model.predict([processed_image])
 
-        if pred[0] == 1:
+        # ラベルをキューに格納
+        label_queue.append(pred[0])
+
+        # キューの中身が全て1の時にkillと判定
+        if all([label == 1 for label in label_queue]):
             # is_killigがFalseの時はTrueにしてデータを保存、Trueの時は保存しない
             if not is_killing:
+                print(label_queue)
                 print("killしました")
                 results.append({
                     "time": calculate_time(cap.get(cv2.CAP_PROP_POS_MSEC)),
@@ -76,9 +84,24 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
                 })
                 pprint(results)
                 is_killing = True
-        # キルしていないときis_killingをFalseにする
-        else:
+
+        # キューの中身が全て0の時にis_killingをFalseにする
+        elif all([label == 0 for label in label_queue]):
             is_killing = False
+
+        # if pred[0] == 1:
+        #     # is_killigがFalseの時はTrueにしてデータを保存、Trueの時は保存しない
+        #     if not is_killing:
+        #         print("killしました")
+        #         results.append({
+        #             "time": calculate_time(cap.get(cv2.CAP_PROP_POS_MSEC)),
+        #             "result": "kill"
+        #         })
+        #         pprint(results)
+        #         is_killing = True
+        # # キルしていないときis_killingをFalseにする
+        # else:
+        #     is_killing = False
 
         # 確認のために画像を表示
         if debug:

@@ -1,4 +1,4 @@
-import { Box, Button, Container, Typography } from "@mui/material";
+import { Box, Button, Container, LinearProgress, Typography } from "@mui/material";
 import { useEffect, useRef, useState, useCallback } from "react";
 import axios from "axios";
 
@@ -20,6 +20,7 @@ export default function App(): JSX.Element {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [videoFileName, setVideoFileName] = useState<string>("");
     const [videoPath, setVideoPath] = useState<string>("");
+    const [isUploading, setIsUploading] = useState<boolean>(false);
 
     // 動画ファイルが選択されたときに呼ばれる処理
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,19 +40,21 @@ export default function App(): JSX.Element {
         formData.append("file", selectedFile);
 
         try {
-            alert("ファイルを送信しています。しばらくお待ちください。");
+            setIsUploading(true); // アップロード開始
+
             // ファイルを送信。成功すればバックエンドからfile_nameが返ってくる
             const response = await axios.post(`${backendUrl}/upload`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            alert("ファイルの送信に成功しました。");
             const videoFileName = response.data.file_name;
             setVideoFileName(videoFileName);
             setVideoPath(`${backendUrl}/uploads/${videoFileName}`);
         } catch (error) {
             alert("ファイルの送信に失敗しました。");
+        } finally {
+            setIsUploading(false); // アップロード完了
         }
     };
 
@@ -87,15 +90,7 @@ export default function App(): JSX.Element {
             if (videoRef.current) {
                 const [hours, minutes, seconds] = time.split(":").map(Number);
                 const secondsToJump = hours * 3600 + minutes * 60 + seconds;
-    
-                // 一旦停止してから再生する
-                videoRef.current.pause(); // 追加
                 videoRef.current.currentTime = secondsToJump;
-    
-                // currentTimeを変更した後に少し遅延を入れて再生する
-                setTimeout(() => {
-                    videoRef.current?.play();
-                }, 100); // 100msの遅延を入れて再生
             }
         },
         [videoRef]
@@ -207,6 +202,12 @@ export default function App(): JSX.Element {
                 >
                     2. 動画ファイルを送信する
                 </Button>
+                {/* アップロード中の場合はプログレスバーを表示 */}
+                {isUploading && (
+                    <Box sx={{ width: "100%", marginBottom: "16px" }}>
+                        <LinearProgress />
+                    </Box>
+                )}
                 <Button
                     variant="contained"
                     color="primary"

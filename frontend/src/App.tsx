@@ -57,7 +57,6 @@ export default function App(): JSX.Element {
     const fetchResult = async () => {
         try {
             const response = await axios.get(`${backendUrl}/predict/${videoFileName}`);
-            console.log(response.data);
             setTimeLines(response.data.time_lines);
         } catch (error) {
             alert("解析結果の取得に失敗しました。");

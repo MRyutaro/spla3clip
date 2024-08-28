@@ -67,7 +67,7 @@ pip install -r requirements.txt
 python main.py <movie_file_path> <output_file_path>
 ```
 コマンドの詳細は以下の通りです。
-| 引数 | 説明 | 必須 | デフォルト値 |
+| 引数 | 説明 | 必須/任意 | デフォルト値 |
 | --- | --- | --- | --- |
 | movie_file_path | 動画ファイルのパスを指定してください。mp4形式のみ対応しています。 | 必須 | なし |
 | output_file_path | 出力ファイルのパスを指定したい場合はcsv形式で指定してください。指定しない場合は`out.csv`に出力されます。 | 任意 | out.csv |

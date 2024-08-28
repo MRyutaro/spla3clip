@@ -9,7 +9,7 @@ import cv2
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from scripts.preprocess_data import process_image
+from scripts.preprocess_data import process_image  # noqa: E402
 
 
 def calculate_time(msec: int) -> str:
@@ -23,7 +23,7 @@ def calculate_time(msec: int) -> str:
     return f"{h:02d}:{m:02d}:{s:02d}"
 
 
-def analyze_video(video_path: str) -> list:
+def analyze_video(video_path: str, pickle_file_path: str) -> list:
     """
     1. 動画のパスを受け取る
     2. kill_model.pickleを読み込む
@@ -32,11 +32,20 @@ def analyze_video(video_path: str) -> list:
     5. キル・デスがあった時刻をリスト形式
     """
     # kill_model.pickleを読み込む
-    with open(r"..\\model_build\\data\\processed\\kill_model.pickle", "rb") as f:
+    if not os.path.exists(pickle_file_path):
+        print(f"モデルファイル {pickle_file_path} が存在しません。パスを確認してください。")
+        return
+    with open(pickle_file_path, "rb") as f:
         kill_model = pickle.load(f)
 
     # 動画を開く
+    if not os.path.exists(video_path):
+        print(f"動画ファイル {video_path} が存在しません。パスを確認してください。")
+        return
     cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print(f"動画ファイル {video_path} を開けませんでした。動画が正しい形式か確認してください。")
+        return
 
     results = []
 
@@ -50,10 +59,9 @@ def analyze_video(video_path: str) -> list:
 
         # 画像の前処理
         processed_image = process_image(frame)
-        flattenned_image = processed_image.flatten()
 
         # モデルに入力
-        pred = kill_model.predict([flattenned_image])
+        pred = kill_model.predict([processed_image])
 
         if pred[0] == 1:
             # is_killigがFalseの時はTrueにしてデータを保存、Trueの時は保存しない
@@ -77,5 +85,6 @@ def analyze_video(video_path: str) -> list:
 
 if __name__ == "__main__":
     # 使用例
-    video_path = r"..\model_analysis\data\hoko.mp4"
-    analyze_video(video_path)
+    pickle_file_path = r"model_build\data\processed\kill_model.pickle"
+    video_path = r"model_analysis\data\hoko.mp4"
+    analyze_video(video_path, pickle_file_path)

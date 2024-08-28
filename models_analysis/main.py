@@ -24,7 +24,7 @@ def calculate_time(msec: int) -> str:
     return f"{h:02d}:{m:02d}:{s:02d}"
 
 
-def analyze_video(video_path: str, pickle_file_path: str) -> list:
+def analyze_video(video_path: str, pickle_dir_path: str) -> list:
     """
     1. 動画のパスを受け取る
     2. kill_model.pickleを読み込む
@@ -33,11 +33,15 @@ def analyze_video(video_path: str, pickle_file_path: str) -> list:
     5. キル・デスがあった時刻をリスト形式
     """
     # kill_model.pickleを読み込む
-    if not os.path.exists(pickle_file_path):
-        print(f"モデルファイル {pickle_file_path} が存在しません。パスを確認してください。")
-        return
-    with open(pickle_file_path, "rb") as f:
-        kill_model = pickle.load(f)
+    if not os.path.exists(os.path.join(pickle_dir_path, "kill_model.pickle")):
+        print(f"pickleファイル {pickle_dir_path} が存在しません。パスを確認してください。")
+        return []
+    try:
+        with open(os.path.join(pickle_dir_path, "kill_model.pickle"), "rb") as f:
+            kill_model = pickle.load(f)
+    except Exception as e:
+        print(f"pickleファイルの読み込みに失敗しました。エラー: {e}")
+        return []
 
     # 動画を開く
     if not os.path.exists(video_path):
@@ -91,9 +95,9 @@ def analyze_video(video_path: str, pickle_file_path: str) -> list:
 if __name__ == "__main__":
     # 使用例
     # カレントディレクトリが/の場合
-    # pickle_file_path = r"models/kill_model.pickle"
+    # pickle_dir_path = r"models"
     # video_path = r"uploads/hoko.mp4"
     # カレントディレクトリが/models_analysisの場合
-    pickle_file_path = r"..\models\kill_model.pickle"
+    pickle_dir_path = r"..\models"
     video_path = r"..\uploads\hoko.mp4"
-    analyze_video(video_path, pickle_file_path)
+    analyze_video(video_path, pickle_dir_path)

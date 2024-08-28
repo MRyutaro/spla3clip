@@ -11,6 +11,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from models_analysis.main import analyze_video
+
 app = FastAPI()
 
 ORIGINS = ["*"]
@@ -74,19 +76,23 @@ def predict(file_name: str):
         return {"status": "error", "message": "file not found"}
 
     # ダミーの推論結果
-    time_lines = [
-        {"time": "00:00:00", "result": "start"},
-        {"time": "00:00:10", "result": "death"},
-        {"time": "00:00:20", "result": "kill"},
-        {"time": "00:00:30", "result": "kill"},
-        {"time": "00:04:50", "result": "kill"},
-        {"time": "00:05:00", "result": "finish"},
-    ]
-    return {
-        "status": "ok",
-        "file_name": file_name,
-        "time_lines": time_lines,
-    }
+    # time_lines = [
+    #     {"time": "00:00:00", "result": "start"},
+    #     {"time": "00:00:10", "result": "death"},
+    #     {"time": "00:00:20", "result": "kill"},
+    #     {"time": "00:00:30", "result": "kill"},
+    #     {"time": "00:04:50", "result": "kill"},
+    #     {"time": "00:05:00", "result": "finish"},
+    # ]
+    try:
+        time_lines = analyze_video(f"{UPLOAD_DIR}/{file_name}", "models")
+        return {
+            "status": "ok",
+            "file_name": file_name,
+            "time_lines": time_lines,
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 def open_browser():

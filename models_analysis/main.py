@@ -79,11 +79,12 @@ def analyze_video(video_path: str, pickle_dir_path: str) -> list:
             is_killing = False
 
         # 確認のために画像を表示
-        cv2.imshow("image", frame)
+        cv2.imshow("image", processed_image)
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
 
     cap.release()
+    cv2.destroyAllWindows()
 
     return results
 

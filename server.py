@@ -74,7 +74,7 @@ def predict_background(file_name: str):
     """
     global TIME_LINES
     time_lines = analyze_video(f"{UPLOAD_DIR}/{file_name}", "models")
-    print(time_lines)
+    # print(time_lines)
     TIME_LINES = time_lines
 
 
@@ -95,7 +95,7 @@ def get_result():
     解析結果を取得する
     """
     global TIME_LINES
-    print(TIME_LINES)
+    # print(TIME_LINES)
     return {"status": "ok", "time_lines": TIME_LINES}
 
 

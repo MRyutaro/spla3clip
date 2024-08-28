@@ -15,7 +15,7 @@ from sklearn.ensemble import RandomForestClassifier
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # scriptsの中にあるprocess_data.pyの中のprocess_image関数をインポート
-from scripts.preprocess_data import load_image, process_image  # noqa: E402
+from scripts.preprocess_data import load_image, process_kill_image  # noqa: E402
 
 # 訓練用データのディレクトリ
 TRAIN_DATA_DIR = "../models_build/data/raw/image"
@@ -42,7 +42,7 @@ def build_kill_model():
         # 画像の前処理
         try:
             image = load_image(image_path)
-            processed_image = process_image(image)
+            processed_image = process_kill_image(image)
             # ラベル「１」を付与してappend
             processed_images.append([processed_image, 1])
         except Exception as e:
@@ -57,7 +57,7 @@ def build_kill_model():
         # 画像の前処理
         try:
             image = load_image(image_path)
-            processed_image = process_image(image)
+            processed_image = process_kill_image(image)
             # ラベル「０」を付与してappend
             processed_images.append([processed_image, 0])
 

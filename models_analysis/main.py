@@ -9,7 +9,7 @@ import cv2
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from scripts.preprocess_data import process_image  # noqa: E402
+from scripts.preprocess_data import process_kill_image  # noqa: E402
 
 
 def calculate_time(msec: int) -> str:
@@ -58,7 +58,7 @@ def analyze_video(video_path: str, pickle_file_path: str) -> list:
             break
 
         # 画像の前処理
-        processed_image = process_image(frame)
+        processed_image = process_kill_image(frame)
 
         # モデルに入力
         pred = kill_model.predict([processed_image])
@@ -81,6 +81,10 @@ def analyze_video(video_path: str, pickle_file_path: str) -> list:
         cv2.imshow("image", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
+
+    cap.release()
+
+    return results
 
 
 if __name__ == "__main__":

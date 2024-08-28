@@ -18,7 +18,7 @@ def load_image(image_path: str) -> np.ndarray:
     return image
 
 
-def process_image(image: np.ndarray) -> np.ndarray:
+def process_kill_image(image: np.ndarray) -> np.ndarray:
     # サイズの確認
     aspect_ratio = image.shape[1] / image.shape[0]
     if abs(aspect_ratio - 16 / 9) > 0.01:
@@ -48,5 +48,6 @@ def process_image(image: np.ndarray) -> np.ndarray:
 
 if __name__ == "__main__":
     # 画像のパス
-    image_path = r'..\model_build\data\raw\image\kill\sample_kill_image.png'
-    process_image(image_path)
+    image_path = r'..\models_build\data\raw\image\kill\sample_kill_image0.png'
+    image = load_image(image_path)
+    process_kill_image(image)

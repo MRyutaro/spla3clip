@@ -35,7 +35,7 @@ app.mount("/uploads", StaticFiles(directory="frontend/build/uploads"), name="upl
 
 # TODO: /frontend/build/uploadsに変更
 UPLOAD_DIR = "frontend/build/uploads"
-TIME_LINE = []
+TIME_LINES = []
 
 
 def randomname(n):
@@ -72,10 +72,10 @@ def predict_background(file_name: str):
     """
     ランダムフォレストによる推論をバックグラウンドで行う
     """
-    global TIME_LINE
+    global TIME_LINES
     time_lines = analyze_video(f"{UPLOAD_DIR}/{file_name}", "models")
     print(time_lines)
-    TIME_LINE = time_lines
+    TIME_LINES = time_lines
 
 
 @app.post("/predict/{file_name}")
@@ -94,9 +94,9 @@ def get_result():
     """
     解析結果を取得する
     """
-    global TIME_LINE
-    print(TIME_LINE)
-    return {"status": "ok", "time_line": TIME_LINE}
+    global TIME_LINES
+    print(TIME_LINES)
+    return {"status": "ok", "time_lines": TIME_LINES}
 
 
 def open_browser():

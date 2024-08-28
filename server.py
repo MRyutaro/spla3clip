@@ -6,7 +6,7 @@ import time
 import webbrowser
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -45,7 +45,7 @@ def read_root():
 
 
 @app.post("/upload")
-async def upload_video(file: bytes):
+async def upload_video(file: UploadFile = File(...)):
     """
     クライアントから受け取った動画ファイルを保存する
     """
@@ -55,8 +55,10 @@ async def upload_video(file: bytes):
         if not os.path.exists(f"{UPLOAD_DIR}/{file_name}"):
             break
     try:
+        # ファイルを保存
         with open(f"{UPLOAD_DIR}/{file_name}", "wb") as f:
-            f.write(file)
+            content = await file.read()  # ファイル内容を読み込み
+            f.write(content)
         return {"status": "ok", "file_name": file_name}
     except Exception as e:
         return {"status": "error", "message": str(e)}

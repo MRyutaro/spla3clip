@@ -8,7 +8,9 @@ import pickle
 import sys
 
 from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
+# from sklearn.tree import DecisionTreeClassifier
+# ランダムフォレストを使う
+from sklearn.ensemble import RandomForestClassifier
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -73,8 +75,11 @@ def build_kill_model():
     # print("訓練データ数：", len(X_train))
     # print("テストデータ数：", len(X_test))
 
-    # 決定木モデルの構築
-    clf = DecisionTreeClassifier()
+    # ランダムフォレストを使う
+    clf = RandomForestClassifier(
+        n_estimators=100,  # 決定木の数
+        random_state=42  # 乱数のシード
+    )
     clf.fit(X_train, Y_train)
 
     # モデルの評価

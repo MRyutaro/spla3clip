@@ -39,12 +39,14 @@ export default function App(): JSX.Element {
         formData.append("file", selectedFile);
 
         try {
+            alert("ファイルを送信しています。しばらくお待ちください。");
             // ファイルを送信。成功すればバックエンドからfile_nameが返ってくる
             const response = await axios.post(`${backendUrl}/upload`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
+            alert("ファイルの送信に成功しました。");
             const videoFileName = response.data.file_name;
             setVideoFileName(videoFileName);
             setVideoPath(`${backendUrl}/uploads/${videoFileName}`);

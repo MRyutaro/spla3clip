@@ -12,51 +12,14 @@ interface TimeLine {
     result: "kill" | "death" | "start" | "finish";
 }
 
-// 解析結果のリスト
-const initialTimeLines: TimeLine[] = [
-    { time: "00:00:00", result: "start" },
-    { time: "00:00:10", result: "death" },
-    { time: "00:00:20", result: "kill" },
-    { time: "00:00:30", result: "kill" },
-    { time: "00:00:40", result: "kill" },
-    { time: "00:00:50", result: "death" },
-    { time: "00:01:00", result: "kill" },
-    { time: "00:01:10", result: "kill" },
-    { time: "00:01:20", result: "death" },
-    { time: "00:01:30", result: "kill" },
-    { time: "00:01:40", result: "kill" },
-    { time: "00:01:50", result: "death" },
-    { time: "00:02:00", result: "kill" },
-    { time: "00:02:10", result: "death" },
-    { time: "00:02:20", result: "kill" },
-    { time: "00:02:30", result: "death" },
-    { time: "00:02:40", result: "kill" },
-    { time: "00:02:50", result: "death" },
-    { time: "00:03:00", result: "kill" },
-    { time: "00:03:10", result: "kill" },
-    { time: "00:03:20", result: "death" },
-    { time: "00:03:30", result: "kill" },
-    { time: "00:03:40", result: "death" },
-    { time: "00:03:50", result: "kill" },
-    { time: "00:04:00", result: "death" },
-    { time: "00:04:10", result: "kill" },
-    { time: "00:04:20", result: "kill" },
-    { time: "00:04:30", result: "death" },
-    { time: "00:04:40", result: "kill" },
-    { time: "00:04:50", result: "kill" },
-    { time: "00:05:00", result: "finish" },
-];
 
 export default function App(): JSX.Element {
     const [timeLines, setTimeLines] = useState<TimeLine[]>([]);
     const videoRef = useRef<HTMLVideoElement>(null);
     const timelineRefs = useRef<(HTMLDivElement | HTMLSpanElement | null)[]>([]);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [videoFileName, setVideoFileName] = useState<string | null>(null);
     const [videoPath, setVideoPath] = useState<string | null>(null);
-
-    useEffect(() => {
-        setTimeLines(initialTimeLines);
-    }, []);
 
     // 動画ファイルが選択されたときに呼ばれる処理
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +46,7 @@ export default function App(): JSX.Element {
                 },
             });
             const videoFileName = response.data.file_name;
+            setVideoFileName(videoFileName);
             setVideoPath(`${backendUrl}/uploads/${videoFileName}`);
         } catch (error) {
             alert("ファイルの送信に失敗しました。");
@@ -92,7 +56,9 @@ export default function App(): JSX.Element {
     // 解析結果を取得する処理
     const fetchResult = async () => {
         try {
-            alert("解析結果を取得しています。");
+            const response = await axios.get(`${backendUrl}/predict/${videoFileName}`);
+            console.log(response.data);
+            setTimeLines(response.data.time_lines);
         } catch (error) {
             alert("解析結果の取得に失敗しました。");
         }

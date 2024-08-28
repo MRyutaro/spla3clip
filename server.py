@@ -31,7 +31,7 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="frontend/build/static"), name="static")
 
 # TODO: /frontend/build/uploadsに変更
-UPLOAD_DIR = "uploads"
+UPLOAD_DIR = "frontend/build/uploads"
 
 
 def randomname(n):
@@ -62,6 +62,27 @@ async def upload_video(file: UploadFile = File(...)):
         return {"status": "ok", "file_name": file_name}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+
+@app.get("/predict/{file_name}")
+def predict(file_name: str):
+    """
+    ランダムフォレストによる推論を行うエンドポイント
+    """
+    # ダミーの推論結果
+    time_lines = [
+        {"time": "00:00:00", "result": "start"},
+        {"time": "00:00:10", "result": "death"},
+        {"time": "00:00:20", "result": "kill"},
+        {"time": "00:00:30", "result": "kill"},
+        {"time": "00:04:50", "result": "kill"},
+        {"time": "00:05:00", "result": "finish"},
+    ]
+    return {
+        "status": "ok",
+        "file_name": file_name,
+        "time_lines": time_lines,
+    }
 
 
 def open_browser():

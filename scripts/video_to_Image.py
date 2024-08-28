@@ -1,5 +1,6 @@
-import cv2
 import os
+
+import cv2
 
 
 def extract_frames_from_video(video_path, output_dir):

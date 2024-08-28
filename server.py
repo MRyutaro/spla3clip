@@ -1,8 +1,9 @@
+import os
+import random
+import string
 import threading
 import time
 import webbrowser
-import random
-import string
 
 import uvicorn
 from fastapi import FastAPI
@@ -49,11 +50,14 @@ async def upload_video(file: bytes):
     クライアントから受け取った動画ファイルを保存する
     """
     # ファイル名は32桁のランダムな数字
-    file_name = f"{randomname(32)}.mp4"
+    while True:
+        file_name = f"{randomname(32)}.mp4"
+        if not os.path.exists(f"{UPLOAD_DIR}/{file_name}"):
+            break
     try:
         with open(f"{UPLOAD_DIR}/{file_name}", "wb") as f:
             f.write(file)
-        return {"status": "ok"}
+        return {"status": "ok", "file_name": file_name}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 

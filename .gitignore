@@ -166,3 +166,5 @@ node_modules
 # フォルダー
 models_build/data/raw
 models_analysis/data/
+uploads/*
+!uploads/.gitkeep

@@ -55,15 +55,26 @@ export default function App(): JSX.Element {
         }
     };
 
+    // 解析タスクを開始する処理
+    const postPredictTask = async () => {
+        try {
+            await axios.post(`${backendUrl}/predict/${videoFileName}`);
+        } catch (error) {
+            alert("解析タスクの開始に失敗しました。");
+        }
+    }
+
     // 解析結果を取得する処理
     const fetchResult = async () => {
         try {
-            const response = await axios.get(`${backendUrl}/predict/${videoFileName}`);
-            setTimeLines(response.data.time_lines);
+            const response = await axios.get(`${backendUrl}/result`);
+            const timeLines: TimeLine[] = response.data.time_lines;
+            // もしundefinedが返ってきたら空の配列にする
+            setTimeLines(timeLines || []);
         } catch (error) {
             alert("解析結果の取得に失敗しました。");
         }
-    };
+    }
 
     // 時刻をクリックしたときに呼ばれる処理
     const handleTimeClick = useCallback(
@@ -86,7 +97,7 @@ export default function App(): JSX.Element {
             if (videoElement) {
                 const currentTime = videoElement.currentTime;
 
-                const closestIndex = timeLines.findIndex((timeLine) => {
+                const closestIndex = timeLines && timeLines.findIndex((timeLine) => {
                     const [hours, minutes, seconds] = timeLine.time
                         .split(":")
                         .map(Number);
@@ -130,6 +141,11 @@ export default function App(): JSX.Element {
 
     // ダウンロード処理
     const handleDownload = useCallback(() => {
+        // timeLinesが空の場合はダウンロードしない
+        if (timeLines.length === 0) {
+            alert("解析結果がありません。");
+            return;
+        }
         const csvContent = convertToCSV(timeLines);
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
@@ -190,6 +206,16 @@ export default function App(): JSX.Element {
                     sx={{
                         marginBottom: "8px",
                     }}
+                    onClick={postPredictTask}
+                >
+                    解析を開始する
+                </Button>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{
+                        marginBottom: "8px",
+                    }}
                     onClick={fetchResult}
                 >
                     解析結果を取得する
@@ -227,24 +253,28 @@ export default function App(): JSX.Element {
                     marginBottom: "8px",
                 }}
             >
-                {timeLines.map((timeLine, index) => (
-                    <Typography
-                        key={index}
-                        component="div"
-                        ref={(el) => (timelineRefs.current[index] = el)}
-                        sx={{
-                            marginBottom: "4px",
-                        }}
-                    >
-                        <b
-                            style={{ cursor: "pointer", color: "blue" }}
-                            onClick={() => handleTimeClick(timeLine.time)}
+                {timeLines.length > 0 ? (
+                    timeLines.map((timeLine, index) => (
+                        <Typography
+                            key={index}
+                            component="div"
+                            ref={(el) => (timelineRefs.current[index] = el)}
+                            sx={{
+                                marginBottom: "4px",
+                            }}
                         >
-                            {timeLine.time}
-                        </b>{" "}
-                        {timeLine.result}
-                    </Typography>
-                ))}
+                            <b
+                                style={{ cursor: "pointer", color: "blue" }}
+                                onClick={() => handleTimeClick(timeLine.time)}
+                            >
+                                {timeLine.time}
+                            </b>{" "}
+                            {timeLine.result}
+                        </Typography>
+                    ))
+                ) : (
+                    <Typography>解析結果がありません。</Typography>
+                )}
             </Box>
             <Box
                 sx={{

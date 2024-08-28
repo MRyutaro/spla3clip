@@ -6,7 +6,7 @@ import time
 import webbrowser
 
 import uvicorn
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -35,6 +35,7 @@ app.mount("/uploads", StaticFiles(directory="frontend/build/uploads"), name="upl
 
 # TODO: /frontend/build/uploadsに変更
 UPLOAD_DIR = "frontend/build/uploads"
+TIME_LINE = []
 
 
 def randomname(n):
@@ -67,32 +68,32 @@ async def upload_video(file: UploadFile = File(...)):
         return {"status": "error", "message": str(e)}
 
 
+def predict_background(file_name: str):
+    """
+    ランダムフォレストによる推論をバックグラウンドで行う
+    """
+    global TIME_LINE
+    time_lines = analyze_video(f"{UPLOAD_DIR}/{file_name}", "models")
+    TIME_LINE = time_lines
+
+
 @app.get("/predict/{file_name}")
-def predict(file_name: str):
+def predict(file_name: str, background_tasks: BackgroundTasks):
     """
     ランダムフォレストによる推論を行うエンドポイント
     """
     if not os.path.exists(f"{UPLOAD_DIR}/{file_name}"):
         return {"status": "error", "message": "file not found"}
+    background_tasks.add_task(predict_background, file_name)
+    return {"status": "ok"}
 
-    # ダミーの推論結果
-    # time_lines = [
-    #     {"time": "00:00:00", "result": "start"},
-    #     {"time": "00:00:10", "result": "death"},
-    #     {"time": "00:00:20", "result": "kill"},
-    #     {"time": "00:00:30", "result": "kill"},
-    #     {"time": "00:04:50", "result": "kill"},
-    #     {"time": "00:05:00", "result": "finish"},
-    # ]
-    try:
-        time_lines = analyze_video(f"{UPLOAD_DIR}/{file_name}", "models")
-        return {
-            "status": "ok",
-            "file_name": file_name,
-            "time_lines": time_lines,
-        }
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+
+@app.get("/result")
+def get_result():
+    """
+    解析結果を取得する
+    """
+    return {"status": "ok", "time_line": TIME_LINE}
 
 
 def open_browser():

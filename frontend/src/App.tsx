@@ -57,6 +57,11 @@ export default function App(): JSX.Element {
 
     // 解析タスクを開始する処理
     const postPredictTask = async () => {
+        if (!videoFileName) {
+            alert("動画ファイルが選択されていません。");
+            return;
+        }
+
         try {
             await axios.post(`${backendUrl}/predict/${videoFileName}`);
         } catch (error) {

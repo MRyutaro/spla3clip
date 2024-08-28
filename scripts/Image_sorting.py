@@ -16,7 +16,7 @@ def load_and_scale_image(image_file, screen_size):
 
 
 def main():
-    image_dir = r'C:\Users\recod\programs\splatoon3_highlight_collector\model_build\data\raw\image'
+    image_dir = r'C:\Users\recod\programs\splatoon3_highlight_collector\models_build\data\raw\image'
     folders = {
         pygame.K_LEFT: os.path.join(image_dir, 'death'),
         pygame.K_UP: os.path.join(image_dir, 'finish'),

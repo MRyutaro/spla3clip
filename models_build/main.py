@@ -10,10 +10,15 @@ import sys
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # scriptsの中にあるprocess_data.pyの中のprocess_image関数をインポート
 from scripts.preprocess_data import load_image, process_image  # noqa: E402
+
+# 訓練用データのディレクトリ
+TRAIN_DATA_DIR = "../models_build/data/raw/image"
+# モデルの保存先ディレクトリ
+MODELS_DIR = "../models"
 
 
 def build_kill_model():
@@ -22,9 +27,9 @@ def build_kill_model():
     """
 
     # 正解データのパス
-    kill_image_dir = '../model_build/data/raw/image/kill'
+    kill_image_dir = os.path.join(TRAIN_DATA_DIR, "kill")
     # 不正解データのパス
-    other_image_dir = '../model_build/data/raw/image/other'
+    other_image_dir = os.path.join(TRAIN_DATA_DIR, "other")
 
     processed_images = []
 
@@ -77,7 +82,8 @@ def build_kill_model():
     print("モデルの精度：", accuracy)
 
     # モデルの保存
-    with open('../model_build/data/processed/kill_model.pickle', 'wb') as f:
+    picke_name = "kill_model.pickle"
+    with open(os.path.join(MODELS_DIR, picke_name), "wb") as f:
         pickle.dump(clf, f)
 
 

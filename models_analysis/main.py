@@ -44,26 +44,33 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
     # 動画を開く
     if not os.path.exists(video_path):
         print(f"動画ファイル {video_path} が存在しません。パスを確認してください。")
-        return
+        return []
+
     cap = cv2.VideoCapture(video_path)
     FPS = cap.get(cv2.CAP_PROP_FPS)
+    TOTAL_FRAME = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+
     if not cap.isOpened():
         print(f"動画ファイル {video_path} を開けませんでした。動画が正しい形式か確認してください。")
         return
 
     results = []
-
     is_killing = False
-
     # ラベルを繰り返し格納するためのキュー
     MAX_LEN = 20
     label_queue = deque(maxlen=MAX_LEN)
+    frame_count = 0
 
     # 動画をフレームごとに読み込む
     while True:
         ret, frame = cap.read()
         if not ret:
             break
+
+        frame_count += 1
+        progress = frame_count / TOTAL_FRAME * 100
+        if debug:
+            print(f"\r{progress:.2f}%", end="")
 
         # 画像の前処理
         processed_image = process_kill_image(frame)

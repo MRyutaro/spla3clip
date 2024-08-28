@@ -26,7 +26,7 @@ def calculate_time(msec: int) -> str:
     return f"{h:02d}:{m:02d}:{s:02d}"
 
 
-def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
+def analyze_video(video_path: str, pickle_dir_path: str, debug=False):
     """
     動画を解析し、キル・デスをした時刻を返す
     """
@@ -67,11 +67,6 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
         if not ret:
             break
 
-        frame_count += 1
-        progress = frame_count / TOTAL_FRAME * 100
-        if debug:
-            print(f"\r{progress:.2f}%", end="")
-
         # 画像の前処理
         processed_image = process_kill_image(frame)
 
@@ -105,11 +100,22 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
+        frame_count += 1
+        progress = frame_count / TOTAL_FRAME * 100
+        if debug:
+            print(f"\r{progress:.2f}%", end="")
+        yield {
+            "progress": progress,
+        }
+
     cap.release()
     if debug:
         cv2.destroyAllWindows()
 
-    return results
+    yield {
+        "progress": 100,
+        "results": results,
+    }
 
 
 if __name__ == "__main__":

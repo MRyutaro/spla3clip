@@ -29,6 +29,7 @@ app.add_middleware(
 
 # Reactでビルドしたファイルを配信するための設定
 app.mount("/static", StaticFiles(directory="frontend/build/static"), name="static")
+app.mount("/uploads", StaticFiles(directory="frontend/build/uploads"), name="uploads")
 
 # TODO: /frontend/build/uploadsに変更
 UPLOAD_DIR = "frontend/build/uploads"
@@ -69,6 +70,9 @@ def predict(file_name: str):
     """
     ランダムフォレストによる推論を行うエンドポイント
     """
+    if not os.path.exists(f"{UPLOAD_DIR}/{file_name}"):
+        return {"status": "error", "message": "file not found"}
+
     # ダミーの推論結果
     time_lines = [
         {"time": "00:00:00", "result": "start"},

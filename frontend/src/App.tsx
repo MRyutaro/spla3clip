@@ -18,8 +18,8 @@ export default function App(): JSX.Element {
     const videoRef = useRef<HTMLVideoElement>(null);
     const timelineRefs = useRef<(HTMLDivElement | HTMLSpanElement | null)[]>([]);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [videoFileName, setVideoFileName] = useState<string | null>(null);
-    const [videoPath, setVideoPath] = useState<string | null>(null);
+    const [videoFileName, setVideoFileName] = useState<string>("");
+    const [videoPath, setVideoPath] = useState<string>("");
 
     // 動画ファイルが選択されたときに呼ばれる処理
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {

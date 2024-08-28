@@ -92,20 +92,6 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
         elif all([label == 0 for label in label_queue]):
             is_killing = False
 
-        # if pred[0] == 1:
-        #     # is_killigがFalseの時はTrueにしてデータを保存、Trueの時は保存しない
-        #     if not is_killing:
-        #         print("killしました")
-        #         results.append({
-        #             "time": calculate_time(cap.get(cv2.CAP_PROP_POS_MSEC)),
-        #             "result": "kill"
-        #         })
-        #         pprint(results)
-        #         is_killing = True
-        # # キルしていないときis_killingをFalseにする
-        # else:
-        #     is_killing = False
-
         # 確認のために画像を表示
         if debug:
             cv2.imshow("image", frame)

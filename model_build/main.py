@@ -13,7 +13,7 @@ from sklearn.tree import DecisionTreeClassifier
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # scriptsの中にあるprocess_data.pyの中のprocess_image関数をインポート
-from scripts.preprocess_data import load_image, process_image
+from scripts.preprocess_data import load_image, process_image  # noqa: E402
 
 
 def build_kill_model():

@@ -26,11 +26,7 @@ def calculate_time(msec: int) -> str:
 
 def analyze_video(video_path: str, pickle_dir_path: str) -> list:
     """
-    1. 動画のパスを受け取る
-    2. kill_model.pickleを読み込む
-    3. 動画をフレームごとに読み込み、モデルに入力する
-    4. モデルの出力を保存する
-    5. キル・デスがあった時刻をリスト形式
+    動画を解析し、キル・デスをした時刻を返す
     """
     # kill_model.pickleを読み込む
     if not os.path.exists(os.path.join(pickle_dir_path, "kill_model.pickle")):

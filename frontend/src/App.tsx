@@ -87,8 +87,15 @@ export default function App(): JSX.Element {
             if (videoRef.current) {
                 const [hours, minutes, seconds] = time.split(":").map(Number);
                 const secondsToJump = hours * 3600 + minutes * 60 + seconds;
+    
+                // 一旦停止してから再生する
+                videoRef.current.pause(); // 追加
                 videoRef.current.currentTime = secondsToJump;
-                videoRef.current.play();
+    
+                // currentTimeを変更した後に少し遅延を入れて再生する
+                setTimeout(() => {
+                    videoRef.current?.play();
+                }, 100); // 100msの遅延を入れて再生
             }
         },
         [videoRef]
@@ -113,7 +120,7 @@ export default function App(): JSX.Element {
                 if (closestIndex !== -1 && timelineRefs.current[closestIndex]) {
                     timelineRefs.current[closestIndex]?.scrollIntoView({
                         behavior: "smooth",
-                        block: "center",
+                        block: "start",
                     });
                 }
             }

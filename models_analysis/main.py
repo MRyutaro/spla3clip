@@ -85,6 +85,10 @@ def analyze_video(video_path: str, pickle_file_path: str) -> list:
 
 if __name__ == "__main__":
     # 使用例
-    pickle_file_path = r"model_build\data\processed\kill_model.pickle"
-    video_path = r"model_analysis\data\hoko.mp4"
+    # カレントディレクトリが/の場合
+    # pickle_file_path = r"models/kill_model.pickle"
+    # video_path = r"uploads/hoko.mp4"
+    # カレントディレクトリが/models_analysisの場合
+    pickle_file_path = r"..\models\kill_model.pickle"
+    video_path = r"..\uploads\hoko.mp4"
     analyze_video(video_path, pickle_file_path)

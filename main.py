@@ -10,7 +10,9 @@ if __name__ == "__main__":
     # python main.py uploads/hoko.mp4みたいな感じで実行
     try:
         video_path = sys.argv[1]
-        analyze_video(video_path, models_dir)
+        time_lines = analyze_video(video_path, models_dir)
     except IndexError:
         print("python main.py {video_path}で実行してください")
         sys.exit(1)
+
+    print(time_lines)

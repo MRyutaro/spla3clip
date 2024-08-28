@@ -69,13 +69,14 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
         if pred[0] == 1:
             # is_killigがFalseの時はTrueにしてデータを保存、Trueの時は保存しない
             if not is_killing:
-                print("killしました")
                 results.append({
                     "time": calculate_time(cap.get(cv2.CAP_PROP_POS_MSEC)),
                     "result": "kill"
                 })
-                pprint(results)
                 is_killing = True
+                if debug:
+                    print("killしました")
+                    pprint(results)
         # キルしていないときis_killingをFalseにする
         else:
             is_killing = False

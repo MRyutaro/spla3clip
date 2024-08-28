@@ -1,9 +1,15 @@
 """
 クライアントから送られてきた動画を解析し、キル・デスをした時刻を返す
 """
-import cv2
+import os
 import pickle
-from preprocess_data import process_image
+import sys
+
+import cv2
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from scripts.preprocess_data import process_image
 
 
 def calculate_time(msec: int) -> str:
@@ -26,7 +32,7 @@ def analyze_video(video_path: str) -> list:
     5. キル・デスがあった時刻をリスト形式
     """
     # kill_model.pickleを読み込む
-    with open(r"C:\Users\recod\programs\splatoon3_highlight_collector\model_build\data\processed\kill_model.pickle", "rb") as f:
+    with open(r"..\\model_build\\data\\processed\\kill_model.pickle", "rb") as f:
         kill_model = pickle.load(f)
 
     # 動画を開く
@@ -48,8 +54,6 @@ def analyze_video(video_path: str) -> list:
 
         # モデルに入力
         pred = kill_model.predict([flattenned_image])
-
-        #
 
         if pred[0] == 1:
             # is_killigがFalseの時はTrueにしてデータを保存、Trueの時は保存しない
@@ -73,5 +77,5 @@ def analyze_video(video_path: str) -> list:
 
 if __name__ == "__main__":
     # 使用例
-    video_path = r"C:\Users\recod\programs\splatoon3_highlight_collector\model_analysis\data\video\スプラ3_3280kill.mp4"
+    video_path = r"..\model_analysis\data\hoko.mp4"
     analyze_video(video_path)

@@ -10,10 +10,15 @@ import cv2
 import numpy as np
 
 
-def process_image(image_path: str) -> np.ndarray:
-    # 画像を開く
+def load_image(image_path: str) -> np.ndarray:
+    """
+    画像を読み込む
+    """
     image = cv2.imread(image_path)
+    return image
 
+
+def process_image(image: np.ndarray) -> np.ndarray:
     # サイズの確認
     aspect_ratio = image.shape[1] / image.shape[0]
     if abs(aspect_ratio - 16 / 9) > 0.01:
@@ -34,6 +39,9 @@ def process_image(image_path: str) -> np.ndarray:
     # print(image.shape)
     # cv2.imshow("image", image)
     # cv2.waitKey(0)
+
+    # フラット化
+    image = image.flatten()
 
     return image
 

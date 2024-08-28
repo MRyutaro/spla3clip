@@ -3,13 +3,17 @@
 
 構築した決定木モデルはdata/processed/clf_model.pickleに保存する
 """
-
-# scriptsの中にあるprocess_data.pyの中のprocess_image関数をインポート
-from preprocess_data import process_image
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import train_test_split
 import os
 import pickle
+import sys
+
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# scriptsの中にあるprocess_data.pyの中のprocess_image関数をインポート
+from scripts.preprocess_data import load_image, process_image
 
 
 def build_kill_model():
@@ -30,11 +34,10 @@ def build_kill_model():
 
         # 画像の前処理
         try:
-            processed_image = process_image(image_path)
-            # processed_imageをフラット化して１次元ベクトルに変換
-            flattenned_image = processed_image.flatten()
+            image = load_image(image_path)
+            processed_image = process_image(image)
             # ラベル「１」を付与してappend
-            processed_images.append([flattenned_image, 1])
+            processed_images.append([processed_image, 1])
         except Exception as e:
             print(f"{image_name}の前処理に失敗しました")
             print(e)
@@ -46,11 +49,10 @@ def build_kill_model():
 
         # 画像の前処理
         try:
-            processed_image = process_image(image_path)
-            # processed_imageをフラット化して１次元ベクトルに変換
-            flattenned_image = processed_image.flatten()
+            image = load_image(image_path)
+            processed_image = process_image(image)
             # ラベル「０」を付与してappend
-            processed_images.append([flattenned_image, 0])
+            processed_images.append([processed_image, 0])
 
             print(f"{image_name}を処理しました")
         except Exception as e:

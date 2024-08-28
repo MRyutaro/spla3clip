@@ -26,7 +26,7 @@ def calculate_time(msec: int) -> str:
     return f"{h:02d}:{m:02d}:{s:02d}"
 
 
-def analyze_video(video_path: str, pickle_dir_path: str) -> list:
+def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
     """
     動画を解析し、キル・デスをした時刻を返す
     """
@@ -81,12 +81,14 @@ def analyze_video(video_path: str, pickle_dir_path: str) -> list:
             is_killing = False
 
         # 確認のために画像を表示
-        cv2.imshow("image", frame)
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            break
+        if debug:
+            cv2.imshow("image", frame)
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
 
     cap.release()
-    cv2.destroyAllWindows()
+    if debug:
+        cv2.destroyAllWindows()
 
     return results
 
@@ -99,4 +101,4 @@ if __name__ == "__main__":
     # カレントディレクトリが/models_analysisの場合
     pickle_dir_path = r"..\models"
     video_path = r"..\uploads\hoko.mp4"
-    analyze_video(video_path, pickle_dir_path)
+    analyze_video(video_path, pickle_dir_path, debug=True)

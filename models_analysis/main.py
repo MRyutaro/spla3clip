@@ -26,7 +26,7 @@ def calculate_time(msec: int) -> str:
     return f"{h:02d}:{m:02d}:{s:02d}"
 
 
-def analyze_video(video_path: str, pickle_dir_path: str) -> list:
+def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
     """
     動画を解析し、キル・デスをした時刻を返す
     """
@@ -72,7 +72,7 @@ def analyze_video(video_path: str, pickle_dir_path: str) -> list:
                 print("killしました")
                 results.append({
                     "time": calculate_time(cap.get(cv2.CAP_PROP_POS_MSEC)),
-                    "results": "kill"
+                    "result": "kill"
                 })
                 pprint(results)
                 is_killing = True
@@ -81,12 +81,14 @@ def analyze_video(video_path: str, pickle_dir_path: str) -> list:
             is_killing = False
 
         # 確認のために画像を表示
-        cv2.imshow("image", frame)
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            break
+        if debug:
+            cv2.imshow("image", frame)
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
 
     cap.release()
-    cv2.destroyAllWindows()
+    if debug:
+        cv2.destroyAllWindows()
 
     return results
 

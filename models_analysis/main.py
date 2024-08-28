@@ -98,5 +98,5 @@ if __name__ == "__main__":
     # video_path = r"uploads/hoko.mp4"
     # カレントディレクトリが/models_analysisの場合
     pickle_dir_path = r"..\models"
-    video_path = r"..\uploads\hoko.mp4"
+    video_path = r"..\models_analysis\data\video\splatoon_test01.mp4"
     analyze_video(video_path, pickle_dir_path)

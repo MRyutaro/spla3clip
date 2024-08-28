@@ -186,25 +186,20 @@ export default function App(): JSX.Element {
                     marginBottom: "16px",
                 }}
             >
-                <Box
+                <p>
+                    1. 動画ファイルを選択する &rarr;{" "}
+                    <input type="file" accept="video/*" onChange={handleFileChange} style={{ marginBottom: "8px" }} />
+                </p>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleFileUpload}
                     sx={{
                         marginBottom: "8px",
-                        // 左右にアイテムを配置
-                        display: "flex",
-                        justifyContent: "space-between",
-                        // 真ん中にアイテムを配置
-                        alignItems: "center",
                     }}
                 >
-                    <input type="file" accept="video/*" onChange={handleFileChange} />
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleFileUpload}
-                    >
-                        動画を送信する
-                    </Button>
-                </Box>
+                    2. 動画ファイルを送信する
+                </Button>
                 <Button
                     variant="contained"
                     color="primary"
@@ -213,7 +208,7 @@ export default function App(): JSX.Element {
                     }}
                     onClick={postPredictTask}
                 >
-                    解析を開始する
+                    3. 解析を開始する
                 </Button>
                 <Button
                     variant="contained"
@@ -223,7 +218,7 @@ export default function App(): JSX.Element {
                     }}
                     onClick={fetchResult}
                 >
-                    解析結果を取得する
+                    4. 解析結果を取得する
                 </Button>
             </Box>
             <hr />
@@ -295,7 +290,7 @@ export default function App(): JSX.Element {
                     }}
                     onClick={handleDownload}
                 >
-                    解析結果をCSVファイルでダウンロード
+                    5. 解析結果をCSVファイルでダウンロードする
                 </Button>
             </Box>
         </Container>

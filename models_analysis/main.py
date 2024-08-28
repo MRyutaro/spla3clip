@@ -70,7 +70,7 @@ def analyze_video(video_path: str, pickle_dir_path: str) -> list:
                 print("killしました")
                 results.append({
                     "time": calculate_time(cap.get(cv2.CAP_PROP_POS_MSEC)),
-                    "results": "kill"
+                    "result": "kill"
                 })
                 pprint(results)
                 is_killing = True

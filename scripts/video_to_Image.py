@@ -27,10 +27,13 @@ def extract_frames_from_video(video_path, output_dir):
             break  # フレームが取得できなかった場合、ループを抜ける
 
         # 10フレームごとに保存
-        if frame_count % 10 == 0:
+        if frame_count % 1 == 0:
             frame_filename = f"{video_name}({saved_count + 1}).png"
             frame_path = os.path.join(output_dir, frame_filename)
             cv2.imwrite(frame_path, frame)
+            # 画像の表示
+            cv2.imshow("frame", frame)
+            cv2.waitKey(1)
             saved_count += 1
 
         frame_count += 1
@@ -41,7 +44,7 @@ def extract_frames_from_video(video_path, output_dir):
 
 
 # 使用例
-video_path = r'C:\Users\recod\programs\splatoon3_highlight_collector\model_build\data\raw\video\スプラ3_3280kill.mp4'
-output_dir = r'C:\Users\recod\programs\splatoon3_highlight_collector\model_build\data\raw\image'
+video_path = r'C:\Users\recod\programs\splatoon3_highlight_collector\models_build\data\raw\video\【(⁎⁍̴̛ᴗ⁍̴̛⁎)】(⁎⁍̴̛ᴗ⁍̴̛⁎)(⁎⁍̴̛ᴗ⁍̴̛⁎)(⁎⁍̴̛ᴗ⁍̴̛⁎)(⁎⁍̴̛ᴗ⁍̴̛⁎)(⁎⁍̴̛ᴗ⁍̴̛⁎)(⁎⁍̴̛ᴗ⁍̴̛⁎)(⁎⁍̴̛ᴗ⁍̴̛⁎)１位　XP4855~.mp4'
+output_dir = r'C:\Users\recod\programs\splatoon3_highlight_collector\models_build\data\raw\image'
 
 extract_frames_from_video(video_path, output_dir)

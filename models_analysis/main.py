@@ -6,6 +6,8 @@ import pickle
 import sys
 from pprint import pprint
 
+# from collections import deque
+
 import cv2
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))

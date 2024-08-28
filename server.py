@@ -77,7 +77,7 @@ def predict_background(file_name: str):
     TIME_LINE = time_lines
 
 
-@app.get("/predict/{file_name}")
+@app.post("/predict/{file_name}")
 def predict(file_name: str, background_tasks: BackgroundTasks):
     """
     ランダムフォレストによる推論を行うエンドポイント

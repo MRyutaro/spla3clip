@@ -24,6 +24,27 @@ TODO: ここにgifを入れる
 #### ◆実行ファイルを使って動かす場合
 
 #### ◆Pythonを使って動かす場合
+1. Pythonをインストールする。
+
+2. レポジトリをクローンする。
+```bash
+git clone https://github.com/MRyutaro/splatoon3_highlight_collector
+```
+
+3. 仮想環境を作成する。
+```bash
+python -m venv .venv
+```
+
+4. 仮想環境を有効化する。
+```bash
+source .venv/bin/activate
+```
+
+5. 依存パッケージをインストールする。
+```bash
+pip install -r requirements.txt
+```
 
 ### ◎コマンド版
 #### ◆実行ファイルを使って動かす場合
@@ -56,6 +77,10 @@ pip install -r requirements.txt
 #### ◆実行ファイルを使って動かす場合
 
 #### ◆Pythonを使って動かす場合
+1. コマンドを実行する。
+```bash
+python server.py
+```
 
 ### ◎コマンド版
 #### ◆実行ファイルを使って動かす場合

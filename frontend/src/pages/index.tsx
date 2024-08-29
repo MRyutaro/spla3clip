@@ -13,6 +13,29 @@ interface TimeLine {
     result: "kill" | "death" | "start" | "finish";
 }
 
+// カスタムボタン
+function CustomButton(props: any) {
+    // ボタンのスタイルを設定
+    return (
+        <Button
+            variant="contained"
+            sx={{
+                backgroundColor: "#f4ee28",
+                marginBottom: "8px",
+                color: "black",
+                // カーソルがボタンに乗った時のスタイルを設定
+                "&:hover": {
+                    backgroundColor: "#d3cd17",
+                },
+            }}
+            {...props}
+        >
+            {props.children}
+        </Button>
+    );
+}
+
+
 export default function Index(): JSX.Element {
     const [timeLines, setTimeLines] = useState<TimeLine[]>([]);
     const [progress, setProgress] = useState<number>(0);
@@ -182,31 +205,14 @@ export default function Index(): JSX.Element {
                         1. 動画ファイルを選択する &rarr;{" "}
                         <input type="file" accept="video/*" onChange={handleFileChange} style={{ marginBottom: "8px" }} />
                     </p>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleFileUpload}
-                        sx={{
-                            marginBottom: "8px",
-                        }}
-                    >
-                        2. 動画ファイルを送信する
-                    </Button>
+                    <CustomButton onClick={handleFileUpload}>2. 動画ファイルをアップロードする</CustomButton>
+                    {/* もしアップロード中ならプログレスバーを表示、そうでなければ0%のプログレスバーを表示、アップロードが完了したら100%のプログレスバーを表示 */}
                     {isUploading ? (
                         <LinearProgress variant="indeterminate" sx={{ marginBottom: "8px" }} />
                     ) : (
-                        <LinearProgress variant="determinate" value={0} sx={{ marginBottom: "8px" }} />
+                        <LinearProgress variant="determinate" value={videoFileName ? 100 : 0} sx={{ marginBottom: "8px" }} />
                     )}
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{
-                            marginBottom: "8px",
-                        }}
-                        onClick={postPredictTask}
-                    >
-                        3. 解析を開始する
-                    </Button>
+                    <CustomButton onClick={postPredictTask}>3. 解析を開始する</CustomButton>
                     <LinearProgress variant="determinate" value={progress} sx={{ marginBottom: "8px" }} />
                 </Box>
                 <hr />
@@ -271,16 +277,7 @@ export default function Index(): JSX.Element {
                         flexDirection: "column",
                     }}
                 >
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{
-                            marginBottom: "4px",
-                        }}
-                        onClick={handleDownload}
-                    >
-                        4. 解析結果をCSVファイルでダウンロードする
-                    </Button>
+                    <CustomButton onClick={handleDownload}>4. 解析結果をCSVファイルでダウンロードする</CustomButton>
                 </Box>
             </Container>
             <Footer />

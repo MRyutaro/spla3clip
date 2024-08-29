@@ -4,9 +4,7 @@ import axios from "axios";
 
 const backendUrl = "http://localhost:8000";
 
-// 時刻とその時刻における解析結果
 interface TimeLine {
-    // timeはhh:mm:ss形式の文字列
     time: string;
     result: "kill" | "death" | "start" | "finish";
 }
@@ -15,20 +13,23 @@ export default function App(): JSX.Element {
     const [timeLines, setTimeLines] = useState<TimeLine[]>([]);
     const [progress, setProgress] = useState<number>(0);
     const [videoFileName, setVideoFileName] = useState<string | null>(null);
-    const [videoPath, setVideoPath] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState<boolean>(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
+    const timelineRefs = useRef<(HTMLDivElement | HTMLSpanElement | null)[]>([]);
     const videoRef = useRef<HTMLVideoElement>(null);
+    const [videoObjectUrl, setVideoObjectUrl] = useState<string | null>(null);
 
-    // 動画ファイルが選択されたときに呼ばれる処理
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
-            setSelectedFile(event.target.files[0]);
+            const file = event.target.files[0];
+            setSelectedFile(file);
+
+            // ファイルのプレビューURLを設定
+            setVideoObjectUrl(URL.createObjectURL(file));
         }
     };
 
-    // 動画をサーバーに送信する処理
     const handleFileUpload = async () => {
         if (!selectedFile) {
             alert("ファイルを選択してください。");
@@ -39,9 +40,7 @@ export default function App(): JSX.Element {
         formData.append("file", selectedFile);
 
         try {
-            setIsUploading(true); // アップロード開始
-
-            // ファイルを送信。成功すればバックエンドからfile_nameが返ってくる
+            setIsUploading(true);
             const response = await axios.post(`${backendUrl}/upload`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
@@ -49,15 +48,13 @@ export default function App(): JSX.Element {
             });
             const videoFileName = response.data.file_name;
             setVideoFileName(videoFileName);
-            setVideoPath(`${backendUrl}/uploads/${videoFileName}`);
         } catch (error) {
             alert("ファイルの送信に失敗しました。");
         } finally {
-            setIsUploading(false); // アップロード完了
+            setIsUploading(false);
         }
     };
 
-    // 解析タスクを開始する処理
     const postPredictTask = async () => {
         if (!videoFileName) {
             alert("動画ファイルが選択されていません。");
@@ -72,7 +69,6 @@ export default function App(): JSX.Element {
         }
     };
 
-    // 進捗状況をリアルタイムで取得する処理
     useEffect(() => {
         if (!isProcessing) {
             return;
@@ -85,7 +81,6 @@ export default function App(): JSX.Element {
             if (data.progress !== undefined) {
                 setProgress(data.progress);
             }
-            // 必要に応じて解析結果も更新
             if (data.results) {
                 setIsProcessing(false);
                 setTimeLines(data.results);
@@ -97,26 +92,35 @@ export default function App(): JSX.Element {
         };
     }, [isProcessing]);
 
-    // 時刻をクリックしたときに呼ばれる処理
+    useEffect(() => {
+        // コンポーネントのアンマウント時にオブジェクトURLを解放
+        return () => {
+            if (videoObjectUrl) {
+                URL.revokeObjectURL(videoObjectUrl);
+            }
+        };
+    }, [videoObjectUrl]);
+
     const handleTimeClick = useCallback(
         (time: string) => {
             if (videoRef.current) {
                 const [hours, minutes, seconds] = time.split(":").map(Number);
                 const secondsToJump = hours * 3600 + minutes * 60 + seconds;
+                console.log(videoRef.current.currentTime);
                 videoRef.current.currentTime = secondsToJump;
+                videoRef.current.play();
+                console.log(videoRef.current.currentTime);
             }
         },
         [videoRef]
     );
 
-    // CSV形式に変換する関数
     const convertToCSV = useCallback((data: TimeLine[]): string => {
         const header = "time,result";
         const rows = data.map((item) => `${item.time},${item.result}`);
         return [header, ...rows].join("\n");
     }, []);
 
-    // ランダムな文字列を生成する関数
     const generateRandomString = useCallback((length: number): string => {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let result = '';
@@ -127,9 +131,7 @@ export default function App(): JSX.Element {
         return result;
     }, []);
 
-    // ダウンロード処理
     const handleDownload = useCallback(() => {
-        // timeLinesが空の場合はダウンロードしない
         if (timeLines.length === 0) {
             alert("解析結果がありません。");
             return;
@@ -183,7 +185,6 @@ export default function App(): JSX.Element {
                 >
                     2. 動画ファイルを送信する
                 </Button>
-                {/* アップロード中の場合はプログレスバーを表示 */}
                 {isUploading && (
                     <Box sx={{ width: "100%", marginBottom: "16px" }}>
                         <LinearProgress />
@@ -199,7 +200,6 @@ export default function App(): JSX.Element {
                 >
                     3. 解析を開始する
                 </Button>
-                {/* 進捗状況を表示するためのコンポーネント */}
                 <LinearProgress variant="determinate" value={progress} sx={{ marginBottom: "8px" }} />
             </Box>
             <hr />
@@ -211,14 +211,14 @@ export default function App(): JSX.Element {
             >
                 解析結果
             </Typography>
-            {/* videoPathがnullでない場合、動画を表示 */}
-            {videoPath && (
+            {videoObjectUrl && (
                 <video
-                    src={videoPath}
+                    src={videoObjectUrl}
+                    ref={videoRef}
                     controls
+                    muted
                     style={{
                         width: "100%",
-                        marginBottom: "8px",
                     }}
                 />
             )}
@@ -242,6 +242,10 @@ export default function App(): JSX.Element {
                             }}
                         >
                             <b
+                                key={index}
+                                ref={(el) => {
+                                    timelineRefs.current[index] = el;
+                                }}
                                 style={{ cursor: "pointer", color: "blue" }}
                                 onClick={() => handleTimeClick(timeLine.time)}
                             >

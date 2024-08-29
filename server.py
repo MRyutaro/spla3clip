@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import string
@@ -6,10 +7,11 @@ import time
 import webbrowser
 
 import uvicorn
-from fastapi import FastAPI, File, UploadFile, BackgroundTasks
+from fastapi import BackgroundTasks, FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from sse_starlette.sse import EventSourceResponse
 
 from models_analysis.main import analyze_video
 
@@ -22,20 +24,20 @@ PORT = 8000
 # CORSの設定
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ORIGINS,  # リクエストを許可するオリジンのリスト
-    allow_credentials=True,  # 認証情報の共有を許可
-    allow_methods=["*"],    # すべてのHTTPメソッドを許可
-    allow_headers=["*"],    # すべてのHTTPヘッダーを許可
+    allow_origins=ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-
 
 # Reactでビルドしたファイルを配信するための設定
 app.mount("/static", StaticFiles(directory="frontend/build/static"), name="static")
 app.mount("/uploads", StaticFiles(directory="frontend/build/uploads"), name="uploads")
 
-# TODO: /frontend/build/uploadsに変更
 UPLOAD_DIR = "frontend/build/uploads"
-TIME_LINES = []
+
+# 進捗状況
+progress = {}
 
 
 def randomname(n):
@@ -44,24 +46,18 @@ def randomname(n):
 
 @app.get("/")
 def read_root():
-    # /frontend/build/index.htmlを返す
     return FileResponse("frontend/build/index.html")
 
 
 @app.post("/upload")
 async def upload_video(file: UploadFile = File(...)):
-    """
-    クライアントから受け取った動画ファイルを保存する
-    """
-    # ファイル名は32桁のランダムな数字
     while True:
         file_name = f"{randomname(32)}.mp4"
         if not os.path.exists(f"{UPLOAD_DIR}/{file_name}"):
             break
     try:
-        # ファイルを保存
         with open(f"{UPLOAD_DIR}/{file_name}", "wb") as f:
-            content = await file.read()  # ファイル内容を読み込み
+            content = await file.read()
             f.write(content)
         return {"status": "ok", "file_name": file_name}
     except Exception as e:
@@ -69,45 +65,38 @@ async def upload_video(file: UploadFile = File(...)):
 
 
 def predict_background(file_name: str):
-    """
-    ランダムフォレストによる推論をバックグラウンドで行う
-    """
-    global TIME_LINES
-    time_lines = analyze_video(f"{UPLOAD_DIR}/{file_name}", "models")
-    print("解析結果：", time_lines)
-    TIME_LINES = time_lines
+    global progress
+    for response in analyze_video(f"{UPLOAD_DIR}/{file_name}", "models"):
+        # print(response)
+        progress = response
 
 
 @app.post("/predict/{file_name}")
 def predict(file_name: str, background_tasks: BackgroundTasks):
-    """
-    ランダムフォレストによる推論を行うエンドポイント
-    """
-    # TODO: ストリーミングを使ってリアルタイムで解析状況を取得できるようにする
     if not os.path.exists(f"{UPLOAD_DIR}/{file_name}"):
         return {"status": "error", "message": "file not found"}
     background_tasks.add_task(predict_background, file_name)
     return {"status": "ok"}
 
 
-@app.get("/result")
-def get_result():
-    """
-    解析結果を取得する
-    """
-    global TIME_LINES
-    # print(TIME_LINES)
-    return {"status": "ok", "time_lines": TIME_LINES}
+@app.get("/events")
+async def sse_endpoint():
+    async def event_generator():
+        global progress
+        if not progress:
+            yield f"{json.dumps({'progress': 0})}\n\n"
+        else:
+            yield f"{json.dumps(progress)}\n\n"
+            progress = {}
+
+    return EventSourceResponse(event_generator())
 
 
 def open_browser():
-    time.sleep(1)  # 少し待機してからブラウザを開く
+    time.sleep(1)
     webbrowser.open(f"http://{HOST}:{PORT}")
 
 
 if __name__ == "__main__":
-    # ブラウザを開くスレッドを開始
     threading.Thread(target=open_browser).start()
-
-    # サーバーを起動
     uvicorn.run("server:app", host=HOST, port=PORT, reload=True)

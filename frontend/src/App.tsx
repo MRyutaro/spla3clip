@@ -4,7 +4,6 @@ import axios from "axios";
 
 const backendUrl = "http://localhost:8000";
 
-
 // 時刻とその時刻における解析結果
 interface TimeLine {
     // timeはhh:mm:ss形式の文字列
@@ -12,15 +11,15 @@ interface TimeLine {
     result: "kill" | "death" | "start" | "finish";
 }
 
-
 export default function App(): JSX.Element {
     const [timeLines, setTimeLines] = useState<TimeLine[]>([]);
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const timelineRefs = useRef<(HTMLDivElement | HTMLSpanElement | null)[]>([]);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [progress, setProgress] = useState<number>(0);
     const [videoFileName, setVideoFileName] = useState<string | null>(null);
     const [videoPath, setVideoPath] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState<boolean>(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     // 動画ファイルが選択されたときに呼ばれる処理
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,23 +65,37 @@ export default function App(): JSX.Element {
         }
 
         try {
+            setIsProcessing(true);
             await axios.post(`${backendUrl}/predict/${videoFileName}`);
         } catch (error) {
             alert("解析タスクの開始に失敗しました。");
         }
-    }
+    };
 
-    // 解析結果を取得する処理
-    const fetchResult = async () => {
-        try {
-            const response = await axios.get(`${backendUrl}/result`);
-            const timeLines: TimeLine[] = response.data.time_lines;
-            // もしundefinedが返ってきたら空の配列にする
-            setTimeLines(timeLines || []);
-        } catch (error) {
-            alert("解析結果の取得に失敗しました。");
+    // 進捗状況をリアルタイムで取得する処理
+    useEffect(() => {
+        if (!isProcessing) {
+            return;
         }
-    }
+
+        const eventSource = new EventSource(`${backendUrl}/events`);
+
+        eventSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.progress !== undefined) {
+                setProgress(data.progress);
+            }
+            // 必要に応じて解析結果も更新
+            if (data.results) {
+                setIsProcessing(false);
+                setTimeLines(data.results);
+            }
+        };
+
+        return () => {
+            eventSource.close();
+        };
+    }, [isProcessing]);
 
     // 時刻をクリックしたときに呼ばれる処理
     const handleTimeClick = useCallback(
@@ -95,38 +108,6 @@ export default function App(): JSX.Element {
         },
         [videoRef]
     );
-
-    // 動画の再生位置を監視して、解析結果の時刻に合わせてスクロールする処理
-    useEffect(() => {
-        const videoElement = videoRef.current;
-
-        const handleTimeUpdate = () => {
-            if (videoElement) {
-                const currentTime = videoElement.currentTime;
-
-                const closestIndex = timeLines && timeLines.findIndex((timeLine) => {
-                    const [hours, minutes, seconds] = timeLine.time
-                        .split(":")
-                        .map(Number);
-                    const timeInSeconds = hours * 3600 + minutes * 60 + seconds;
-                    return timeInSeconds >= currentTime;
-                });
-
-                if (closestIndex !== -1 && timelineRefs.current[closestIndex]) {
-                    timelineRefs.current[closestIndex]?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start",
-                    });
-                }
-            }
-        };
-
-        videoElement?.addEventListener("timeupdate", handleTimeUpdate);
-
-        return () => {
-            videoElement?.removeEventListener("timeupdate", handleTimeUpdate);
-        };
-    }, [timeLines]);
 
     // CSV形式に変換する関数
     const convertToCSV = useCallback((data: TimeLine[]): string => {
@@ -218,16 +199,8 @@ export default function App(): JSX.Element {
                 >
                     3. 解析を開始する
                 </Button>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    sx={{
-                        marginBottom: "8px",
-                    }}
-                    onClick={fetchResult}
-                >
-                    4. 解析結果を取得する
-                </Button>
+                {/* 進捗状況を表示するためのコンポーネント */}
+                <LinearProgress variant="determinate" value={progress} sx={{ marginBottom: "8px" }} />
             </Box>
             <hr />
             <Typography
@@ -242,7 +215,6 @@ export default function App(): JSX.Element {
             {videoPath && (
                 <video
                     src={videoPath}
-                    ref={videoRef}
                     controls
                     style={{
                         width: "100%",
@@ -265,8 +237,6 @@ export default function App(): JSX.Element {
                     timeLines.map((timeLine, index) => (
                         <Typography
                             key={index}
-                            component="div"
-                            ref={(el) => (timelineRefs.current[index] = el)}
                             sx={{
                                 marginBottom: "4px",
                             }}
@@ -298,7 +268,7 @@ export default function App(): JSX.Element {
                     }}
                     onClick={handleDownload}
                 >
-                    5. 解析結果をCSVファイルでダウンロードする
+                    4. 解析結果をCSVファイルでダウンロードする
                 </Button>
             </Box>
         </Container>

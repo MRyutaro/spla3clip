@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 
 export default function Header(): JSX.Element {
@@ -7,12 +7,12 @@ export default function Header(): JSX.Element {
             sx={{
                 bgcolor: "#4f2ede",
                 color: "white",
-                padding: 1,
+                padding: 4,
             }}
         >
-            <h1>
-                スプラ3-キルクリップメーカー
-            </h1>
+            <Typography variant="h4">
+                Spla3Clip
+            </Typography>
         </Box>
     );
 }

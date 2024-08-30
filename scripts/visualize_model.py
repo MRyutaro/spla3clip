@@ -41,8 +41,8 @@ def visualize_model(model_path: str, sample_image_path: str):
     plt.imshow(
         feature_importances, cmap='hot', alpha=0.8, interpolation='nearest')
 
-    # カラーバーの追加
-    plt.colorbar()
+    # カラーバーの追加.。高さを画像の高さに合わせる
+    plt.colorbar(shrink=0.6)
 
     # 表示
     plt.axis('off')  # 軸を非表示にする

@@ -133,10 +133,10 @@ export default function Index(): JSX.Element {
             if (videoRef.current) {
                 const [hours, minutes, seconds] = time.split(":").map(Number);
                 const secondsToJump = hours * 3600 + minutes * 60 + seconds;
-                console.log(videoRef.current.currentTime);
+                // console.log(videoRef.current.currentTime);
                 videoRef.current.currentTime = secondsToJump;
                 videoRef.current.play();
-                console.log(videoRef.current.currentTime);
+                // console.log(videoRef.current.currentTime);
             }
         },
         [videoRef]

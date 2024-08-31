@@ -7,15 +7,16 @@ import os
 import pickle
 import sys
 
-from sklearn.model_selection import train_test_split
 # from sklearn.tree import DecisionTreeClassifier
 # ランダムフォレストを使う
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # scriptsの中にあるprocess_data.pyの中のprocess_image関数をインポート
-from scripts.preprocess_data import load_image, process_kill_image  # noqa: E402
+from scripts.preprocess_data import (load_image,  # noqa: E402
+                                     process_kill_image)
 
 # 訓練用データのディレクトリ
 TRAIN_DATA_DIR = "../models_build/data/raw/image"

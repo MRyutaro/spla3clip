@@ -3,12 +3,10 @@ import sys
 
 import cv2
 import matplotlib.pyplot as plt
+from preprocess_data import HEIGHT, WIDTH
 
 
 def visualize_model(model_path: str, sample_image_path: str):
-    WIDTH = 320
-    HEIGHT = 180
-
     try:
         with open(model_path, 'rb') as f:
             model = pickle.load(f)

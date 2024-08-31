@@ -9,6 +9,9 @@ import cv2
 # from sklearn.model_selection import train_test_split
 import numpy as np
 
+WIDTH = 320
+HEIGHT = 180
+
 
 def load_image(image_path: str) -> np.ndarray:
     """
@@ -29,8 +32,6 @@ def process_kill_image(image: np.ndarray) -> np.ndarray:
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # グレースケール変換
 
     # リサイズ
-    WIDTH = 320
-    HEIGHT = 180
     image = cv2.resize(image, (WIDTH, HEIGHT))
 
     # # 加工した画像を開いて確認

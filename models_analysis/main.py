@@ -12,7 +12,7 @@ import cv2
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from scripts.preprocess_data import process_kill_image  # noqa: E402
+from scripts.preprocess_data import process_image  # noqa: E402
 
 
 def calculate_time(msec: int) -> str:
@@ -26,7 +26,7 @@ def calculate_time(msec: int) -> str:
     return f"{h:02d}:{m:02d}:{s:02d}"
 
 
-def analyze_video(video_path: str, pickle_dir_path: str, debug=False):
+def analyze_video(video_path: str, pickle_dir_path: str, debug=False) -> list:
     """
     動画を解析し、キル・デスをした時刻を返す
     """
@@ -44,22 +44,20 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False):
     # 動画を開く
     if not os.path.exists(video_path):
         print(f"動画ファイル {video_path} が存在しません。パスを確認してください。")
-        return []
-
+        return
     cap = cv2.VideoCapture(video_path)
     FPS = cap.get(cv2.CAP_PROP_FPS)
-    TOTAL_FRAME = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-
     if not cap.isOpened():
         print(f"動画ファイル {video_path} を開けませんでした。動画が正しい形式か確認してください。")
         return
 
     results = []
+
     is_killing = False
+
     # ラベルを繰り返し格納するためのキュー
     MAX_LEN = 20
     label_queue = deque(maxlen=MAX_LEN)
-    frame_count = 0
 
     # 動画をフレームごとに読み込む
     while True:
@@ -68,7 +66,7 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False):
             break
 
         # 画像の前処理
-        processed_image = process_kill_image(frame)
+        processed_image = process_image(frame)
 
         # モデルに入力
         pred = kill_model.predict([processed_image])
@@ -100,22 +98,11 @@ def analyze_video(video_path: str, pickle_dir_path: str, debug=False):
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
-        frame_count += 1
-        progress = frame_count / TOTAL_FRAME * 100
-        if debug:
-            print(f"\r{progress:.2f}%", end="")
-        yield {
-            "progress": progress,
-        }
-
     cap.release()
     if debug:
         cv2.destroyAllWindows()
 
-    yield {
-        "progress": 100,
-        "results": results,
-    }
+    return results
 
 
 if __name__ == "__main__":
@@ -125,5 +112,5 @@ if __name__ == "__main__":
     # video_path = r"uploads/hoko.mp4"
     # カレントディレクトリが/models_analysisの場合
     pickle_dir_path = r"..\models"
-    video_path = r"..\models_analysis\data\video\splatoon_test01.mp4"
+    video_path = r"..\models_analysis\data\video\area.mp4"
     analyze_video(video_path, pickle_dir_path, debug=True)

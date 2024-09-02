@@ -19,7 +19,7 @@ def load_and_scale_image(image_file, screen_size):
 
 
 def main():
-    image_dir = r'C:\Users\recod\programs\splatoon3_highlight_collector\models_build\data\raw\image\other'
+    image_dir = r'C:\Users\recod\programs\splatoon3_highlight_collector\models_build\data\raw\image\death'
 
     pygame.init()
     screen_size = (800, 600)

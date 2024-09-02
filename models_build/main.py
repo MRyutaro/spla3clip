@@ -7,10 +7,10 @@ import os
 import pickle
 import sys
 
-from sklearn.model_selection import train_test_split
 # from sklearn.tree import DecisionTreeClassifier
 # ランダムフォレストを使う
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

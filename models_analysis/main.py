@@ -4,9 +4,8 @@
 import os
 import pickle
 import sys
-from pprint import pprint
-
 from collections import deque
+from pprint import pprint
 
 import cv2
 

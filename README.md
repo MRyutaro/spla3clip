@@ -1,6 +1,6 @@
 # splatoon3_highlight_collector
 
-TODO: ここにgifを入れる
+![サンプルイメージ](/docs/sample_image.gif)
 
 スプラトゥーン3でキル・デスした時刻を自動で集めるツールです。
 

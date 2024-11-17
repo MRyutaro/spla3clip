@@ -1,4 +1,4 @@
-# splatoon3_highlight_collector
+# spla3clip
 
 ![サンプルイメージ](/docs/sample_image.gif)
 

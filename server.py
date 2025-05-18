@@ -31,10 +31,10 @@ app.add_middleware(
 )
 
 # Reactでビルドしたファイルを配信するための設定
-app.mount("/static", StaticFiles(directory="frontend/build/static"), name="static")
-app.mount("/uploads", StaticFiles(directory="frontend/build/uploads"), name="uploads")
+app.mount("/static", StaticFiles(directory="frontend.backup/build/static"), name="static")
+app.mount("/uploads", StaticFiles(directory="frontend.backup/build/uploads"), name="uploads")
 
-UPLOAD_DIR = "frontend/build/uploads"
+UPLOAD_DIR = "frontend.backup/build/uploads"
 
 # 進捗状況
 progress = {}
@@ -46,7 +46,7 @@ def randomname(n):
 
 @app.get("/")
 def read_root():
-    return FileResponse("frontend/build/index.html")
+    return FileResponse("frontend.backup/build/index.html")
 
 
 @app.post("/upload")

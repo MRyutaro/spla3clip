@@ -68,13 +68,7 @@ export default function Home() {
           </nav>
         </div>
       </header>
-      <main
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "2rem",
-        }}
-      >
+      <main>
         <Container
           sx={{
             display: "flex",
